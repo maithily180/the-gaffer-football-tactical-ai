@@ -460,7 +460,72 @@ Decision: YOLOv11 (or YOLOv8 as fallback). Both use the identical Ultralytics AP
 
 **License**: AGPL-3.0 (open source, fine for a student project)
 
-**Hardware requirement**: Runs on CPU (slow) or GPU. On NVIDIA GPU, inference takes ~5ms/frame at 640×640. On CPU, ~100–200ms/frame. For a 60-second clip at 25fps = 1500 frames. GPU: ~8 seconds. CPU: ~4 minutes just for detection.
+**Hardware requirement**: Runs on CPU (slow) or GPU. On NVIDIA GPU, inference takes ~5ms/frame at 640×640. On CPU, ~100–200ms/frame at 640×640. On Intel Arc integrated graphics without OpenVINO, YOLOv11 at 1280px can be ~300ms/frame. For a 60-second clip at 25fps = 1500 frames, this is too slow without adaptation.
+
+### 3.2.1 Intel-specific adaptation: Core Ultra 9 185H + Arc integrated graphics
+
+This project is being built on a machine with:
+- Intel Core Ultra 9 185H: 16 cores (6P + 8E + 2 LPE)
+- 32GB RAM
+- Intel Arc Graphics integrated GPU (128MB shared)
+- ~302GB free storage
+- Windows host OS
+
+The key hardware fact: this is not an NVIDIA CUDA machine. Every PyTorch model runs on CPU by default unless an Intel runtime is used.
+
+**Recommended adaptation**:
+- Use Ultralytics OpenVINO export for YOLOv11.
+- Run detection at `imgsz=640` instead of `1280`.
+- Detect every 3rd frame.
+- Update ByteTrack every frame.
+
+This gives the best tradeoff for your device:
+- Player detection remains very strong.
+- Ball detection drops modestly from ~70% to ~55% recall, but frame interpolation recovers most missed ball positions.
+- Detection workload drops from 1500 frames to 500 model calls.
+- OpenVINO on Arc can reduce inference to ~30–80ms/frame at 640px, instead of ~300ms/frame on CPU.
+
+**Exact adaptation commands**:
+```bash
+# Export your fine-tuned YOLO model to OpenVINO
+yolo export model=weights/yolov11_football.pt format=openvino imgsz=640
+```
+
+```python
+for frame_idx, frame in enumerate(video_frames):
+    if frame_idx % 3 == 0:
+        detections = model(frame)           # run detection
+    tracked = tracker.update(detections)    # tracking runs every frame
+```
+
+**Intel GPU commentary note**:
+- Prefer `qwen2.5:3b` on this machine because it is smaller (1.9GB) and fits the Intel Arc performance profile.
+- If Ollama does not auto-detect the Intel GPU, start it with `OLLAMA_INTEL_GPU=1 ollama serve`.
+
+**Realistic timing on this device**:
+- Detection (OpenVINO, 640px, every 3rd frame = 500 calls): ~40–80 seconds
+- Tracking + camera motion: ~8 seconds
+- Spatial analytics: ~5 seconds
+- Commentary (~8 events × 7s): ~55 seconds
+- Video annotation + write: ~30 seconds
+- Total: ~2.5–3 minutes for a 60-second clip
+
+**Storage check**:
+- Python `.venv`: 3 GB
+- Qwen2.5 3B (Ollama): 1.9 GB
+- YOLOv11s weights: 45 MB
+- OpenVINO export: 90 MB
+- Test clips: ~2 GB
+- Training dataset: 120 MB
+- Output videos: ~500 MB each
+- Total needed: ~10 GB
+
+With ~302GB free, this is comfortable. Do not download SoccerNet 4TB; use YouTube clips instead.
+
+**Windows/WSL2 guidance**:
+- Use WSL2 on Windows for the Python/CV pipeline.
+- Install `Ubuntu-22.04` in WSL2 and run the core Python workflow there.
+- Ollama can stay on native Windows and be accessed from WSL2 at `http://localhost:11434`.
 
 ---
 
@@ -594,19 +659,24 @@ Instead, Qwen2.5 **text** model receives structured JSON produced by the CV pipe
 
 **Hardware requirement**: 
 - 8GB VRAM GPU (NVIDIA): Qwen2.5 7B Q4_K_M quantized via Ollama, ~5GB model, ~1–2s per commentary line
-- CPU only: ~15–20s per commentary line (still acceptable, called only on events)
-- Apple Silicon M-series: runs efficiently via Metal, comparable to GPU
+- Intel Arc GPU / OpenVINO: prefer `qwen2.5:3b` (1.9GB). Expect 8–15 tokens/second on Intel GPU, so an 80-token commentary line takes ~5–10 seconds.
+- CPU only: ~15–20s per commentary line for Qwen2.5 7B; `qwen2.5:3b` is faster and better suited to low-memory or CPU-first devices.
+- Apple Silicon M-series: runs efficiently via Metal, comparable to GPU.
+
+**Intel-specific note**:
+This device uses Intel Arc integrated graphics, not an NVIDIA card. Ollama can use the Intel backend if detected automatically or when started with `OLLAMA_INTEL_GPU=1 ollama serve`.
+Use `ollama pull qwen2.5:3b` rather than 7B for the current laptop, and keep 7B as a future option on stronger hardware or cloud.
 
 **Installation**:
 ```bash
 # Install Ollama
 curl -fsSL https://ollama.ai/install.sh | sh
 
-# Pull the model (4.7GB download)
-ollama pull qwen2.5:7b
+# Pull the model
+ollama pull qwen2.5:3b  # 1.9GB instead of 4.7GB
 
 # Verify
-ollama run qwen2.5:7b "Describe a football press in one sentence."
+ollama run qwen2.5:3b "Describe a football press in one sentence."
 ```
 
 **API usage** (Python):
@@ -670,6 +740,7 @@ brew install ffmpeg
 | scipy | ≥1.13.0 | Voronoi, convex hull, KD-tree | `uv add scipy` |
 | scikit-learn | ≥1.5.0 | K-Means clustering | `uv add scikit-learn` |
 | ollama | ≥0.2.0 | Qwen2.5 7B client | `uv add ollama` |
+| openvino | optional | Intel OpenVINO runtime for Arc/CPU inference | `uv add openvino` |
 | gradio | ≥4.40.0 | Demo UI | `uv add gradio` |
 | torch | ≥2.3.0 | PyTorch (YOLO dependency) | `uv add torch` |
 | torchvision | ≥0.18.0 | Vision utilities | `uv add torchvision` |
@@ -892,7 +963,7 @@ Every other feature depends on knowing where players and the ball are. This is t
 model = YOLO('weights/yolov11_football.pt')
 results = model(frame, conf=0.35, iou=0.45, imgsz=1280, verbose=False)
 ```
-Note: `imgsz=1280` instead of default 640 is critical for ball detection — the ball is tiny and high resolution helps significantly.
+Note: `imgsz=1280` instead of default 640 is critical for ball detection on a powerful GPU. On this Intel Arc device, the practical default is `imgsz=640` with OpenVINO export and every-3rd-frame detection; ball gaps are filled by interpolation.
 
 **Training approach** (fine-tuning):
 - Base: `yolo11s.pt` (Ultralytics pretrained on COCO)
