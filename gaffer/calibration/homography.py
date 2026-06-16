@@ -71,6 +71,51 @@ class HomographyEstimator:
         x, y = result[0][0]
         return (float(x), float(y))
 
+    def project_to_image(
+        self, world_pt: tuple[float, float], H: np.ndarray
+    ) -> tuple[float, float] | None:
+        """
+        Inverse projection: world (pitch metres) → pixel, using H^-1.
+        Returns None if H is None or non-invertible.
+        """
+        if H is None:
+            return None
+        try:
+            H_inv = np.linalg.inv(H)
+        except np.linalg.LinAlgError:
+            return None
+        pt = np.array([[[float(world_pt[0]), float(world_pt[1])]]], dtype=np.float32)
+        result = cv2.perspectiveTransform(pt, H_inv)
+        x, y = result[0][0]
+        return (float(x), float(y))
+
+    def reprojection_error(
+        self,
+        image_pts: np.ndarray,
+        world_pts: np.ndarray,
+        H: np.ndarray,
+    ) -> tuple[float, float, np.ndarray]:
+        """
+        Validate H by reprojecting the world landmarks back into the image
+        (world → pixel via H^-1) and comparing to the clicked image points.
+
+        This is the trust gate: hand-clicked calibration is only as good as its
+        reprojection error. Measured in IMAGE PIXELS (what we clicked in).
+
+        Returns:
+            (mean_error_px, max_error_px, per_point_errors[N])
+        """
+        image_pts = np.asarray(image_pts, dtype=np.float64)
+        world_pts = np.asarray(world_pts, dtype=np.float64)
+        errs = np.full(len(world_pts), np.inf)
+        for i, w in enumerate(world_pts):
+            reproj = self.project_to_image((w[0], w[1]), H)
+            if reproj is None:
+                continue
+            errs[i] = float(np.hypot(reproj[0] - image_pts[i][0],
+                                     reproj[1] - image_pts[i][1]))
+        return float(np.mean(errs)), float(np.max(errs)), errs
+
     def _are_collinear(self, pts: np.ndarray, tol: float = 1e-6) -> bool:
         """Return True if all points lie on a single line."""
         if len(pts) < 3:

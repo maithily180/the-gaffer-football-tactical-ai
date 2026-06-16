@@ -31,6 +31,16 @@ class Detection:
         return ((x1 + x2) // 2, (y1 + y2) // 2)
 
     @property
+    def foot_point(self) -> tuple[int, int]:
+        """
+        Bottom-centre of the bbox — where the player meets the ground.
+        This is what gets projected onto the pitch (the bbox centre floats
+        ~1m above the grass and would land the player too far up-field).
+        """
+        x1, _, x2, y2 = self.bbox
+        return ((x1 + x2) // 2, y2)
+
+    @property
     def width(self) -> int:
         return self.bbox[2] - self.bbox[0]
 

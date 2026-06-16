@@ -20,6 +20,13 @@ FORMATION_TEMPLATES_PATH = DATA_DIR / "formation_templates.json"
 PITCH_LENGTH_M = 105.0
 PITCH_WIDTH_M = 68.0
 
+# Pitch-template / minimap drawing scale. Single source of truth shared by
+# PitchModel, generate_pitch_template.py and the minimap so they never drift.
+# A pitch point (x_m, y_m) maps to template pixel:
+#   (PITCH_MARGIN_PX + x_m * PITCH_SCALE_PX_PER_M, PITCH_MARGIN_PX + y_m * PITCH_SCALE_PX_PER_M)
+PITCH_SCALE_PX_PER_M = 10       # 1050x680 pitch at 10 px/m
+PITCH_MARGIN_PX = 40            # padding around the pitch (room for goals at x<0 / x>105)
+
 PITCH_KEYPOINTS = {
     "left_corner_top":          (0.0,    0.0),
     "left_corner_bottom":       (0.0,   68.0),
@@ -40,6 +47,19 @@ PITCH_KEYPOINTS = {
     "right_penalty_box_tr":     (105.0,13.85),
     "right_penalty_box_br":     (105.0,54.15),
     "right_penalty_box_bl":     (88.5, 54.15),
+    # Six-yard boxes (5.5m deep, 18.32m wide). Naming follows the pitch-diagram
+    # convention: l/r = smaller/larger x, t/b = smaller/larger y.
+    "left_six_yard_tl":         (0.0,  24.84),
+    "left_six_yard_tr":         (5.5,  24.84),
+    "left_six_yard_br":         (5.5,  43.16),
+    "left_six_yard_bl":         (0.0,  43.16),
+    "right_six_yard_tl":        (99.5, 24.84),
+    "right_six_yard_tr":        (105.0,24.84),
+    "right_six_yard_br":        (105.0,43.16),
+    "right_six_yard_bl":        (99.5, 43.16),
+    # Penalty-arc apex (furthest point of the "D" from goal, on y=34)
+    "left_arc_apex":            (20.15, 34.0),
+    "right_arc_apex":           (84.85, 34.0),
 }
 
 # ─── Detection ────────────────────────────────────────────────────────────────

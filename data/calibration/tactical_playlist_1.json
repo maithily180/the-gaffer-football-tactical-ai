@@ -1,0 +1,66 @@
+{
+  "clip": "tactical_playlist_1.mp4",
+  "frame_idx": 1375,
+  "fps": 25.0,
+  "image_points": {
+    "left_penalty_spot": [
+      345,
+      385
+    ],
+    "left_penalty_box_tr": [
+      672,
+      249
+    ],
+    "left_penalty_box_br": [
+      224,
+      623
+    ],
+    "left_six_yard_tr": [
+      312,
+      295
+    ],
+    "left_six_yard_br": [
+      60,
+      452
+    ],
+    "left_arc_apex": [
+      593,
+      405
+    ],
+    "left_penalty_box_tl": [
+      305,
+      209
+    ],
+    "left_six_yard_tl": [
+      180,
+      280
+    ],
+    "left_corner_top": [
+      432,
+      134
+    ],
+    "left_goal_center": [
+      44,
+      359
+    ]
+  },
+  "homography": [
+    [
+      0.04492339941437981,
+      0.07948798021502691,
+      -30.22930439652207
+    ],
+    [
+      -0.020918445431015883,
+      0.18908154790468704,
+      -16.32035114683157
+    ],
+    [
+      -0.00020573015808394562,
+      0.0013301485621710447,
+      1.0
+    ]
+  ],
+  "reprojection_mean_px": 3.27101827803624,
+  "reprojection_max_px": 5.3777191686494925
+}
