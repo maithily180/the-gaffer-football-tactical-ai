@@ -53,6 +53,7 @@ import numpy as np
 
 from gaffer import config
 from gaffer.detection.detector import Detection
+from gaffer.tracking.ball_state_estimator import BallState, BallStateEstimator
 
 
 class BallCandidateFilter:
@@ -104,6 +105,7 @@ class BallCandidateFilter:
         self.n_rejected_off_pitch  = 0
         self.n_scene_cuts_detected = 0
         self.n_recovery_accepted   = 0
+        self.n_suspect_discards    = 0   # times a false-positive hypothesis was dropped
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -113,12 +115,13 @@ class BallCandidateFilter:
         field_dets: List[Detection],
         frame_idx: int,
         *,
-        prev_frame: np.ndarray | None          = None,
-        curr_frame: np.ndarray | None          = None,
-        homography_manager                     = None,
-        last_ball_pos: tuple[int, int] | None  = None,
+        prev_frame: np.ndarray | None             = None,
+        curr_frame: np.ndarray | None             = None,
+        homography_manager                        = None,
+        last_ball_pos: tuple[int, int] | None     = None,
         last_ball_vel: tuple[float, float] | None = None,   # (vx, vy) px/det-frame
-        last_detection_frame: int | None       = None,
+        last_detection_frame: int | None          = None,
+        state_estimator: BallStateEstimator | None = None,
     ) -> List[Detection]:
         """
         Return at most one ball Detection: the best candidate that passes all
@@ -154,7 +157,10 @@ class BallCandidateFilter:
         # Predicted ball position for spatial gate
         pred_pos = self._predict(last_ball_pos, last_ball_vel,
                                  last_detection_frame, frame_idx)
-        gate_r   = self._gate_radius(last_ball_vel, missed_dframes)
+        gate_r   = self._gate_radius(
+            last_ball_vel, missed_dframes,
+            ball_state=state_estimator.state if state_estimator else None,
+        )
 
         # Player cluster centre (used for scoring + recovery reacquisition)
         cluster  = self._player_cluster(field_dets)
@@ -195,18 +201,47 @@ class BallCandidateFilter:
         if not passed:
             return []
 
+        # ── Suspect check: discard false-positive hypothesis ──────────────────
+        # When the tracked ball has had no approach voters for too long the
+        # current hypothesis is probably a penalty spot / ad board / crowd blob.
+        # Force a fresh re-acquisition using approach voters as the primary
+        # signal instead of confidence (which would just pick the same blob again).
+        if state_estimator is not None and state_estimator.is_suspect():
+            state_estimator.reset()
+            self._gate_active = False
+            self.n_suspect_discards += 1
+            # Pick the candidate with the most players actively approaching it
+            approach_backed = sorted(
+                passed,
+                key=lambda d: (
+                    state_estimator.approach_voters(d.center, field_dets),
+                    d.confidence,
+                ),
+                reverse=True,
+            )
+            best = approach_backed[0]
+            if state_estimator.approach_voters(best.center, field_dets) > 0:
+                self._gate_active = True
+                return [best]
+            return []   # no approach-backed candidate — stay lost rather than guess
+
         # ── Select best candidate ──────────────────────────────────────────────
-        # Confidence is the primary signal. Cluster proximity is a tiebreaker
-        # only among candidates within 15% of the best confidence — never
-        # overrides a clearly higher-confidence detection (avoids wrong-candidate
-        # poisoning of the tracker position).
+        # Confidence is primary. On ties within 85% band, break by:
+        #   1. Approach voters (most players moving toward candidate wins)
+        #   2. Distance to player cluster (closer is better)
         best_conf = max(d.confidence for d in passed)
         top_tier  = [d for d in passed if d.confidence >= best_conf * 0.85]
+
         if len(top_tier) == 1:
             best_det = top_tier[0]
         else:
-            best_det = min(top_tier,
-                           key=lambda d: self._dist_to_cluster(d, cluster))
+            def _score(d: Detection) -> tuple:
+                voters = (
+                    state_estimator.approach_voters(d.center, field_dets)
+                    if state_estimator else 0
+                )
+                return (voters, -self._dist_to_cluster(d, cluster))
+            best_det = max(top_tier, key=_score)
 
         if in_recovery:
             self.n_recovery_accepted += 1
@@ -215,12 +250,13 @@ class BallCandidateFilter:
 
     def rejection_summary(self) -> dict[str, int]:
         return {
-            "stationary":     self.n_rejected_stationary,
-            "spatial":        self.n_rejected_spatial,
-            "proximity":      self.n_rejected_proximity,
-            "off_pitch":      self.n_rejected_off_pitch,
-            "scene_cuts":     self.n_scene_cuts_detected,
-            "recovery_accept":self.n_recovery_accepted,
+            "stationary":      self.n_rejected_stationary,
+            "spatial":         self.n_rejected_spatial,
+            "proximity":       self.n_rejected_proximity,
+            "off_pitch":       self.n_rejected_off_pitch,
+            "scene_cuts":      self.n_scene_cuts_detected,
+            "recovery_accept": self.n_recovery_accepted,
+            "suspect_discards":self.n_suspect_discards,
         }
 
     # ── Internal ──────────────────────────────────────────────────────────────
@@ -296,13 +332,21 @@ class BallCandidateFilter:
 
     def _gate_radius(
         self,
-        last_vel: tuple[float, float] | None,
+        last_vel:   tuple[float, float] | None,
         missed_dframes: int,
+        ball_state: BallState | None = None,
     ) -> float:
         if not self._gate_active:
             return self._gate_max
         speed = math.sqrt(last_vel[0] ** 2 + last_vel[1] ** 2) if last_vel else 0.0
         r = self._gate_base + speed * self._gate_speed_mult + missed_dframes * self._gate_miss_growth
+        # State-aware adjustments — only widen, never tighten below natural value.
+        # Tightening in IN_POSSESSION risks rejecting legitimate detections when
+        # the ball changes carrier quickly or the player touches it far from feet.
+        if ball_state == BallState.AIRBORNE:
+            r = min(r * 1.4, self._gate_max)   # wider — aerial ball travels far
+        elif ball_state == BallState.PASS:
+            r = min(r * 1.15, self._gate_max)  # slightly wider — fast pass
         return min(r, self._gate_max)
 
     def _missed_dframes(

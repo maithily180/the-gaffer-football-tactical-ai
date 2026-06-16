@@ -28,6 +28,7 @@ from gaffer.detection.detector import FootballDetector
 from gaffer.detection.team_assigner import TeamAssigner
 from gaffer.output.annotator import Annotator
 from gaffer.tracking.ball_candidate_filter import BallCandidateFilter
+from gaffer.tracking.ball_state_estimator import BallStateEstimator
 from gaffer.tracking.ball_tracker import BallTracker
 from gaffer.tracking.position_store import PositionStore
 from gaffer.tracking.tracker import PlayerTracker
@@ -111,11 +112,12 @@ class GafferPipeline:
         print(f"  TeamAssigner fitted: {assigner.n_fit_samples} jersey crops  "
               f"cluster→team {assigner.cluster_to_team}")
 
-        tracker      = PlayerTracker(fps=loader.fps)
-        ball_tracker = BallTracker()
-        ball_filter  = BallCandidateFilter()
-        store        = PositionStore(fps=loader.fps)
-        annotator    = Annotator()
+        tracker         = PlayerTracker(fps=loader.fps)
+        ball_tracker    = BallTracker()
+        ball_filter     = BallCandidateFilter()
+        state_estimator = BallStateEstimator()
+        store           = PositionStore(fps=loader.fps)
+        annotator       = Annotator()
 
         # ── 2. Main loop ──────────────────────────────────────────────────────
         print(f"Processing {n_frames} frames …")
@@ -146,8 +148,25 @@ class GafferPipeline:
                         last_ball_pos=ball_tracker.last_position_px(),
                         last_ball_vel=ball_tracker.last_velocity_vector(),
                         last_detection_frame=ball_tracker.last_detection_frame(),
+                        state_estimator=state_estimator,
                     )
                     ball_result = ball_tracker.update(ball_dets, frame_idx)
+                    # Only update state with real YOLO detections.
+                    # Extrapolated positions (confidence=0.0) are BallTracker
+                    # predictions, not actual observations — passing them to
+                    # state_estimator would increment the suspect counter against
+                    # a position that may not be where the ball really is.
+                    state_det = (
+                        ball_result
+                        if ball_result is not None and ball_result.confidence > 0
+                        else None
+                    )
+                    state_estimator.update(
+                        state_det,
+                        ball_tracker.last_velocity_vector(),
+                        field_dets,
+                        frame_idx,
+                    )
                 else:
                     field_dets  = tracker.carry_forward()
                     # On skip frames, feed empty list so BallTracker extrapolates.

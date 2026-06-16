@@ -103,6 +103,16 @@ BALL_SCENE_CUT_THRESHOLD    = 0.40  # normalised histogram diff above this → c
 BALL_RECOVERY_FRAMES        = 5     # detection frames of loss before recovery mode
 BALL_CLUSTER_RADIUS_PX      = 150   # in recovery mode, candidate must be within this of cluster
 
+# Ball state machine + approach voter scoring
+# Players are tracked via ByteTrack IDs; their frame-to-frame velocity vectors
+# vote for whichever ball candidate they are converging toward.
+BALL_POSSESSION_DIST_PX        = 65    # px — nearest player foot → in possession
+BALL_PASS_SPEED_PX_FRAME       = 12.0  # px/det-frame above which ball is in a pass
+BALL_APPROACH_DIST_PX          = 300   # px — search radius for approach voters
+BALL_APPROACH_DOT_THRESH       = 0.35  # dot product floor: "player moving toward ball"
+BALL_SUSPECT_NO_APPROACH_FRAMES = 8    # consecutive det-frames with 0 voters → suspect
+BALL_SUSPECT_MIN_TRACK_FRAMES  = 5     # don't declare suspect until tracked this long
+
 CLASS_PLAYER = 0
 CLASS_GOALKEEPER = 1
 CLASS_REFEREE = 2

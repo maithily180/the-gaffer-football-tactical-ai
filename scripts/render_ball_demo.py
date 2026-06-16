@@ -38,8 +38,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from gaffer import config
 from gaffer.detection.detector import Detection, FootballDetector
-from gaffer.tracking.ball_tracker import BallTracker
 from gaffer.tracking.ball_candidate_filter import BallCandidateFilter
+from gaffer.tracking.ball_state_estimator import BallStateEstimator
+from gaffer.tracking.ball_tracker import BallTracker
+from gaffer.tracking.tracker import PlayerTracker
 from gaffer.video.loader import VideoLoader
 from gaffer.video.writer import VideoWriter
 
@@ -91,7 +93,8 @@ def _draw_trail(frame: np.ndarray, trail: deque) -> None:
 
 
 def _draw_hud(frame, frame_idx, fps, n_det, n_ext, n_lost, ball_result,
-              is_live, rej: dict) -> None:
+              is_live, rej: dict, ball_state: str = "UNKNOWN",
+              approach_voters: int = 0) -> None:
     total = n_det + n_ext + n_lost
     ts = frame_idx / fps
     status = ("LIVE" if (ball_result and is_live)
@@ -99,7 +102,8 @@ def _draw_hud(frame, frame_idx, fps, n_det, n_ext, n_lost, ball_result,
                else "LOST")
 
     lines = [
-        f"t = {ts:.1f}s          Ball: {status}",
+        f"t = {ts:.1f}s       Ball: {status}",
+        f"State: {ball_state}   Voters: {approach_voters}",
         "",
         f"Detected   : {n_det:4d} ({100*n_det/max(total,1):.0f}%)",
         f"Predicted  : {n_ext:4d} ({100*n_ext/max(total,1):.0f}%)",
@@ -109,13 +113,14 @@ def _draw_hud(frame, frame_idx, fps, n_det, n_ext, n_lost, ball_result,
         f"Spatial    : {rej.get('spatial',0)} killed",
         f"Stationary : {rej.get('stationary',0)} killed",
         f"Off-pitch  : {rej.get('off_pitch',0)} killed",
+        f"Suspect    : {rej.get('suspect_discards',0)} discarded",
         f"Recovery   : {rej.get('recovery_accept',0)} reacquired",
         f"Cuts       : {rej.get('scene_cuts',0)} detected",
     ]
 
     pad, line_h = 8, 19
     box_h = pad * 2 + line_h * len(lines) + 4
-    box_w = 230
+    box_w = 245
     overlay = frame.copy()
     cv2.rectangle(overlay, (8, 8), (8 + box_w, 8 + box_h), (0, 0, 0), -1)
     cv2.addWeighted(overlay, 0.55, frame, 0.45, 0, frame)
@@ -155,10 +160,12 @@ def main() -> None:
     else:
         print(f"Calibration : not found at {calib_path}  (on-pitch gate DISABLED)")
 
-    loader       = VideoLoader(str(clip_path))
-    detector     = FootballDetector(verbose=False)
-    ball_tracker = BallTracker()
-    ball_filter  = BallCandidateFilter()
+    loader          = VideoLoader(str(clip_path))
+    detector        = FootballDetector(verbose=False)
+    player_tracker  = PlayerTracker(fps=loader.fps)
+    ball_tracker    = BallTracker()
+    ball_filter     = BallCandidateFilter()
+    state_estimator = BallStateEstimator()
 
     start_frame = int(args.start * loader.fps)
     n_frames    = min(int(args.duration * loader.fps),
@@ -187,6 +194,7 @@ def main() -> None:
             is_detect_frame = (frame_idx == detector._last_detect_idx)
 
             if is_detect_frame:
+                field_dets  = player_tracker.update(field_dets, frame)
                 ball_dets = ball_filter.filter(
                     ball_dets, field_dets, frame_idx,
                     prev_frame=prev_frame,
@@ -195,10 +203,25 @@ def main() -> None:
                     last_ball_pos=ball_tracker.last_position_px(),
                     last_ball_vel=ball_tracker.last_velocity_vector(),
                     last_detection_frame=ball_tracker.last_detection_frame(),
+                    state_estimator=state_estimator,
                 )
                 ball_result = ball_tracker.update(ball_dets, frame_idx)
+                # Extrapolated positions have confidence=0.0 — treat as no detection
+                # so the suspect counter only increments on actual YOLO observations.
+                state_det = (
+                    ball_result
+                    if ball_result is not None and ball_result.confidence > 0
+                    else None
+                )
+                state_estimator.update(
+                    state_det,
+                    ball_tracker.last_velocity_vector(),
+                    field_dets,
+                    frame_idx,
+                )
                 is_live     = bool(ball_dets)
             else:
+                field_dets  = player_tracker.carry_forward()
                 ball_result = ball_tracker.update([], frame_idx)
                 is_live     = False
 
@@ -219,8 +242,15 @@ def main() -> None:
                 _draw_ball(out, ball_result, is_live)
 
             rej = ball_filter.rejection_summary()
+            voters = (
+                state_estimator.approach_voters(
+                    ball_result.center, field_dets
+                ) if ball_result and field_dets else 0
+            )
             _draw_hud(out, frame_idx, loader.fps,
-                      n_detected, n_extrap, n_lost, ball_result, is_live, rej)
+                      n_detected, n_extrap, n_lost, ball_result, is_live, rej,
+                      ball_state=state_estimator.state.value,
+                      approach_voters=voters)
 
             writer.write(out)
             timings.append(time.perf_counter() - t0)
@@ -255,6 +285,8 @@ def main() -> None:
     print(f"  Stationary gate    : {rej['stationary']:4d} detections killed")
     print(f"  Proximity gate     : {rej['proximity']:4d} detections killed")
     print(f"  On-pitch gate      : {rej['off_pitch']:4d} detections killed")
+    print(f"  Suspect discards   : {rej['suspect_discards']:4d} hypotheses dropped")
+    print(f"  Recovery accept    : {rej['recovery_accept']:4d} reacquired")
     print(f"  Scene cuts detected: {rej['scene_cuts']:4d}")
     print()
     print(f"  Output : {out_path}  ({size_mb:.1f} MB)")
