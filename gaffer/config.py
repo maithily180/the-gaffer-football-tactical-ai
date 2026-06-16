@@ -1,0 +1,125 @@
+"""
+All configurable constants in one place.
+Change values here; nothing else needs editing.
+"""
+
+from pathlib import Path
+
+# ─── Paths ────────────────────────────────────────────────────────────────────
+ROOT = Path(__file__).parent.parent
+WEIGHTS_DIR = ROOT / "weights"
+DATA_DIR = ROOT / "data"
+OUTPUTS_DIR = ROOT / "outputs"
+
+DETECTION_MODEL_PATH = WEIGHTS_DIR / "yolov11_football.pt"
+DETECTION_MODEL_OPENVINO_PATH = WEIGHTS_DIR / "yolov11_football_openvino"
+PITCH_TEMPLATE_PATH = DATA_DIR / "pitch_template.png"
+FORMATION_TEMPLATES_PATH = DATA_DIR / "formation_templates.json"
+
+# ─── Pitch Dimensions ─────────────────────────────────────────────────────────
+PITCH_LENGTH_M = 105.0
+PITCH_WIDTH_M = 68.0
+
+PITCH_KEYPOINTS = {
+    "left_corner_top":          (0.0,    0.0),
+    "left_corner_bottom":       (0.0,   68.0),
+    "right_corner_top":         (105.0,  0.0),
+    "right_corner_bottom":      (105.0, 68.0),
+    "left_penalty_spot":        (11.0,  34.0),
+    "right_penalty_spot":       (94.0,  34.0),
+    "center_spot":              (52.5,  34.0),
+    "left_goal_center":         (0.0,   34.0),
+    "right_goal_center":        (105.0, 34.0),
+    "halfway_line_top":         (52.5,   0.0),
+    "halfway_line_bottom":      (52.5,  68.0),
+    "left_penalty_box_tl":      (0.0,  13.85),
+    "left_penalty_box_tr":      (16.5, 13.85),
+    "left_penalty_box_br":      (16.5, 54.15),
+    "left_penalty_box_bl":      (0.0,  54.15),
+    "right_penalty_box_tl":     (88.5, 13.85),
+    "right_penalty_box_tr":     (105.0,13.85),
+    "right_penalty_box_br":     (105.0,54.15),
+    "right_penalty_box_bl":     (88.5, 54.15),
+}
+
+# ─── Detection ────────────────────────────────────────────────────────────────
+DETECTION_CONF_THRESHOLD = 0.25  # Day 1: 0.25 gives ~16 players vs 10 at 0.35
+DETECTION_IOU_THRESHOLD = 0.45
+DETECTION_IMG_SIZE = 640       # 640 for OpenVINO on Intel Arc; 1280 on NVIDIA
+DETECT_EVERY_N_FRAMES = 3      # Day 1: frame-to-frame delta ≈ 0 → skip-3 safe
+
+CLASS_PLAYER = 0
+CLASS_GOALKEEPER = 1
+CLASS_REFEREE = 2
+CLASS_BALL = 3
+
+CLASS_NAMES = {
+    CLASS_PLAYER: "player",
+    CLASS_GOALKEEPER: "goalkeeper",
+    CLASS_REFEREE: "referee",
+    CLASS_BALL: "ball",
+}
+
+# ─── Tracking ─────────────────────────────────────────────────────────────────
+TRACK_THRESH = 0.25            # confidence floor; all dets at this level enter high-conf pool
+TRACK_BUFFER_FRAMES = 45       # frames a lost track survives (~1.8s at 25fps)
+# supervision ByteTrack uses IoU COST (1-IoU) as the matching threshold.
+# cost <= MATCH_THRESH  ↔  IoU >= (1 - MATCH_THRESH)
+# 0.7 → accepts IoU >= 0.3, appropriate for 120ms detection gaps at football speed
+MATCH_THRESH = 0.7
+DEFAULT_FPS = 25
+
+# ─── Team Assignment ──────────────────────────────────────────────────────────
+TEAM_KMEANS_CLUSTERS = 3
+JERSEY_CROP_TOP = 0.10         # exclude head (top 10% of bbox)
+JERSEY_CROP_BOTTOM = 0.20      # exclude shorts (bottom 20% of bbox)
+JERSEY_MIN_SATURATION = 40     # HSV saturation floor — filters shadows/whites
+JERSEY_MIN_VALUE = 40          # HSV value floor
+
+# ─── Camera Motion ────────────────────────────────────────────────────────────
+OPTICAL_FLOW_MAX_CORNERS = 200
+OPTICAL_FLOW_QUALITY = 0.01
+OPTICAL_FLOW_MIN_DISTANCE = 30
+SCENE_CHANGE_HIST_THRESHOLD = 0.4   # histogram diff above this → scene cut
+
+# ─── Spatial Analytics ────────────────────────────────────────────────────────
+PRESSING_RADIUS_M = 10.0
+SPRINT_THRESHOLD_MS = 7.0          # m/s ≈ 25 km/h
+SPRINT_MIN_FRAMES = 3
+FORMATION_WINDOW_FRAMES = 125      # classify formation every 5s at 25fps
+VELOCITY_WINDOW_FRAMES = 5         # frames used to compute rolling velocity
+MINIMAP_RENDER_EVERY_N = 5         # only re-render minimap every 5th frame
+
+# ─── Event Detection ──────────────────────────────────────────────────────────
+SHOT_SPEED_THRESHOLD_MS = 15.0
+SHOT_GOAL_ANGLE_THRESHOLD = 0.7    # cosine similarity to goal direction
+HIGH_PRESS_INTENSITY_THRESHOLD = 3
+FORMATION_SHIFT_COOLDOWN_FRAMES = 125
+
+# ─── Commentary ───────────────────────────────────────────────────────────────
+OLLAMA_URL = "http://localhost:11434"
+OLLAMA_MODEL = "qwen2.5:3b"        # use 3b on Intel Arc; 7b on NVIDIA
+COMMENTARY_TEMPERATURE = 0.7
+COMMENTARY_MAX_TOKENS = 120
+REPORT_TEMPERATURE = 0.5
+REPORT_MAX_TOKENS = 400
+
+# ─── Output / Rendering ───────────────────────────────────────────────────────
+OUTPUT_VIDEO_WIDTH = 1280          # write at 720p-equivalent width
+OUTPUT_VIDEO_HEIGHT = 720
+OUTPUT_VIDEO_FPS = 25
+OUTPUT_VIDEO_CODEC = "mp4v"
+
+MINIMAP_WIDTH = 300
+MINIMAP_HEIGHT = 200
+MINIMAP_ALPHA = 0.85               # transparency when compositing onto frame
+
+# BGR color palette
+TEAM_A_COLOR_BGR = (0, 0, 220)     # red
+TEAM_B_COLOR_BGR = (220, 0, 0)     # blue
+BALL_COLOR_BGR = (0, 255, 255)     # yellow
+REFEREE_COLOR_BGR = (30, 30, 30)   # dark grey
+SPRINT_COLOR_BGR = (0, 165, 255)   # orange
+DEF_LINE_COLOR_BGR = (0, 255, 0)   # green
+VORONOI_A_COLOR = (0, 0, 80)       # dark red (semi-transparent overlay)
+VORONOI_B_COLOR = (80, 0, 0)       # dark blue (semi-transparent overlay)

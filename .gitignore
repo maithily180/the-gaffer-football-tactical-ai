@@ -1,2 +1,66 @@
-# Ignore local device specs and notes
+﻿# Ignore local device specs and notes
 device-specs.md
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# uv
+.uv/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Model weights (large binary files)
+*.pt
+*.bin
+*.onnx
+weights/
+
+# Executed notebooks (have large embedded images in cell outputs)
+notebooks/*_executed.ipynb
+
+# Video files
+data/test_clips/
+outputs/
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Temporary
+*.tmp
+*.temp
