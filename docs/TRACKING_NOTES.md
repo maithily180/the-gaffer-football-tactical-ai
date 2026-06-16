@@ -4,6 +4,70 @@ Lessons learned the hard way. Read before touching any tracker parameter.
 
 ---
 
+## 0. Day 5 audit: measure ID SWITCHES, not unique-ID count
+
+After fine-tuning, a 60s clip still produced ~392 unique IDs for ~20 players, so
+I ran `scripts/tracking_audit.py` to reduce it. **My first pass optimised the
+wrong metric (unique-ID count) and shipped a regression.** The visible problem
+is ID *switches* — how often the number on a player flips — and that is what the
+audit now ranks by. Final numbers (tactical_playlist_1, 30–90s):
+
+| config | **switches** | uniqIDs | ≥10s | speed |
+|---|---|---|---|---|
+| **B  ByteTrack skip3 conf.35  (SHIPPED)** | **47** | 374 | 28 | fast |
+| A  ByteTrack skip3 conf.25  (old prod ≈ v0.2) | 60 | 395 | 29 | fast |
+| D  BoT-SORT+CMC skip3 | 148 | 355 | 26 | slow |
+| F  BoT-SORT+CMC every-frame conf.35 | 176 | 159 | 33 | 3× slow |
+| C  ByteTrack every-frame | 177 | 278 | 34 | slow |
+| E  BoT-SORT+CMC every-frame conf.25 | 294 | 242 | 35 | slow |
+
+**Hard lessons:**
+1. **Unique-ID count is a misleading target.** A tracker can keep the count low
+   while constantly swapping IDs between players. Config F had the *fewest* IDs
+   (159) but ~3× the switching of the simple baseline. Most of the ~390 IDs in
+   the good configs are players **re-entering frame after a camera cut** (a new
+   ID on return) — not mid-track instability. Low switches = IDs stick to players.
+2. **BoT-SORT+CMC was worse than plain ByteTrack at every setting.** Its looser
+   association (first-assoc IoU 0.2) swaps IDs in crowds, and CMC mis-warps on
+   textureless grass with independently-moving players. The fancy tracker lost.
+3. **Every-frame detection increased switching**, not decreased it — more
+   frame-to-frame association wobble, whereas skip-3's carry-forward holds IDs
+   steady for the 2 cached frames. (It does make box *motion* smoother, though.)
+4. **Confidence is the one real win:** `conf .35` → 47 switches vs `.25` → 60.
+   Shipped as a tracker-level filter (`config.TRACK_MIN_CONF`) on players/GKs
+   only; the detector floor stays 0.25 so the ball (~0.10/frame) and referees
+   still get detected/drawn.
+5. **Team-assignment instability is a non-cause** — `team_id` never feeds the
+   tracker.
+
+**Verdict: kept supervision ByteTrack + skip-3, raised the track-entry conf to
+0.35.** Lowering the unique-ID count further needs cross-gap re-identification,
+which is hard for football (teammates wear identical kits) and doesn't improve
+what you see on screen — switches do.
+
+---
+
+## 0b. Why BoT-SORT (roboflow `trackers`) was tried and reverted
+
+BoT-SORT adds Camera-Motion Compensation (frame-to-frame affine warp via sparse
+optical flow). It *sounds* ideal for broadcast pans, and reduced unique-ID count,
+but **raised ID switching** (§0) so it was reverted. Notes if revisited:
+- **The mapping trap that cost a day:** roboflow trackers RE-ORDER their output
+  (confirmed tracks first, unconfirmed `-1`s last) while returning the input box
+  coords unchanged. Mapping the returned `tracker_id` array **by index** assigns
+  IDs to the wrong players — looks fine on unique-count, catastrophic on
+  switches. Map by **bbox key**. (Verify with a ≥3-box mixed-confidence probe;
+  a 2-box clean probe misleadingly shows order preserved.)
+- **Convention trap:** roboflow BoT-SORT uses a DIRECT IoU floor
+  (`minimum_iou_threshold_first_assoc=0.2`, higher = stricter) — opposite of
+  supervision ByteTrack's IoU-*cost* ceiling (§1).
+- Its pedestrian defaults (`track_activation_threshold=0.7`) activate **zero**
+  tracks on football detections at conf ~0.3 — set activation to `TRACK_MIN_CONF`.
+- If retried: disable CMC (grass is featureless), tighten first-assoc IoU, and
+  judge on switches — not count.
+
+---
+
 ## 1. supervision ByteTrack — threshold semantics are inverted
 
 **The trap:**

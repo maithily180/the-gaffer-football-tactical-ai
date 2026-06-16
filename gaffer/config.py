@@ -43,10 +43,12 @@ PITCH_KEYPOINTS = {
 }
 
 # ─── Detection ────────────────────────────────────────────────────────────────
-DETECTION_CONF_THRESHOLD = 0.25  # Day 1: 0.25 gives ~16 players vs 10 at 0.35
+DETECTION_CONF_THRESHOLD = 0.25  # low floor keeps ball (~0.10/frame) & referees in view
 DETECTION_IOU_THRESHOLD = 0.45
 DETECTION_IMG_SIZE = 640       # 640 for OpenVINO on Intel Arc; 1280 on NVIDIA
-DETECT_EVERY_N_FRAMES = 3      # Day 1: frame-to-frame delta ≈ 0 → skip-3 safe
+# Day 5 audit: every-frame detection INCREASED visible ID switching (carry-forward
+# at skip-3 holds IDs steadier) and cost 3×. Kept skip-3.
+DETECT_EVERY_N_FRAMES = 3
 
 CLASS_PLAYER = 0
 CLASS_GOALKEEPER = 1
@@ -61,11 +63,14 @@ CLASS_NAMES = {
 }
 
 # ─── Tracking ─────────────────────────────────────────────────────────────────
-TRACK_THRESH = 0.25            # confidence floor; all dets at this level enter high-conf pool
-TRACK_BUFFER_FRAMES = 45       # frames a lost track survives (~1.8s at 25fps)
+# Day 5 audit verdict: supervision ByteTrack + skip-3 minimises ID *switches*
+# (47 at conf .35) — BoT-SORT+CMC and every-frame detection both made switching
+# worse (see docs/TRACKING_NOTES.md §0/§0b). conf .35 is the one tuning win.
+TRACK_MIN_CONF = 0.35          # only players/GKs >= this enter tracking (47 vs 60 switches @ .25)
+TRACK_THRESH = 0.25            # legacy alias; tracking activation now uses TRACK_MIN_CONF
+TRACK_BUFFER_FRAMES = 45       # wall-clock frames a lost track survives (~1.8s @ 25fps)
 # supervision ByteTrack uses IoU COST (1-IoU) as the matching threshold.
-# cost <= MATCH_THRESH  ↔  IoU >= (1 - MATCH_THRESH)
-# 0.7 → accepts IoU >= 0.3, appropriate for 120ms detection gaps at football speed
+# cost <= MATCH_THRESH  ↔  IoU >= (1 - MATCH_THRESH);  0.7 → accepts IoU >= 0.3.
 MATCH_THRESH = 0.7
 DEFAULT_FPS = 25
 

@@ -132,7 +132,7 @@ class GafferPipeline:
                 dets = assigner.assign(frame, dets)
 
                 if frame_idx == detector._last_detect_idx:
-                    dets = tracker.update(dets)
+                    dets = tracker.update(dets, frame)   # frame → BoT-SORT camera-motion comp
                 else:
                     dets = tracker.carry_forward()
 

@@ -20,50 +20,66 @@ class PlayerTracker:
     """
     Wraps supervision.ByteTrack to assign stable integer track_ids to players.
 
-    Supervision's update_with_detections() returns only *confirmed* tracks
-    (those that survived minimum_consecutive_frames detection cycles). This
-    class maps confirmed bboxes back onto the original Detection list so that:
-      - confirmed detections carry their track_id
-      - unconfirmed detections keep track_id=-1
-      - on skip frames (detect_every_n cache frames), the last confirmed
-        result is carried forward unchanged
+    Why ByteTrack and NOT BoT-SORT+CMC
+    ----------------------------------
+    Day 5 audit (scripts/tracking_audit.py) measured ID *switches* — how often
+    the number on a player flips, the thing you actually see — not just unique-ID
+    count. Plain ByteTrack at skip-3 was the clear winner (47 switches at conf
+    .35) vs BoT-SORT+CMC (148 at skip-3, 176 every-frame). BoT-SORT's looser
+    association swaps IDs between players in crowds and its camera-motion
+    compensation mis-warps on textureless grass; every-frame detection adds
+    association wobble that skip-3's carry-forward avoids. Unique-ID count was a
+    misleading target: most of those IDs are players re-entering frame after a
+    camera cut, not mid-track instability.
 
-    Call update() once per detection frame (not every frame).
-    On cache frames, call carry_forward() to propagate the last result.
+    Only players/goalkeepers with confidence >= config.TRACK_MIN_CONF enter
+    tracking (audit: conf .35 → 47 switches vs .25 → 60). Lower-confidence and
+    non-trackable detections pass through with track_id=-1.
+
+    Call update() on detection frames; carry_forward() on skip frames.
     """
 
     def __init__(
         self,
         fps: float = config.DEFAULT_FPS,
-        track_thresh: float = config.TRACK_THRESH,
-        track_buffer: int = config.TRACK_BUFFER_FRAMES,
+        min_conf: float = config.TRACK_MIN_CONF,
         match_thresh: float = config.MATCH_THRESH,
-        min_consecutive: int = 1,
     ):
+        self._min_conf = min_conf
+        # lost_track_buffer is counted in update() calls, and update() runs once
+        # per detection frame → convert the wall-clock buffer to update-steps.
+        buffer_steps = max(1, round(config.TRACK_BUFFER_FRAMES / config.DETECT_EVERY_N_FRAMES))
         self._byte = sv.ByteTrack(
-            track_activation_threshold=track_thresh,
-            lost_track_buffer=track_buffer,
-            minimum_matching_threshold=match_thresh,
+            track_activation_threshold=min_conf,
+            lost_track_buffer=buffer_steps,
+            minimum_matching_threshold=match_thresh,   # IoU COST ceiling: 0.7 → IoU ≥ 0.3
             frame_rate=fps,
-            minimum_consecutive_frames=min_consecutive,
+            minimum_consecutive_frames=1,
         )
         self._last_result: List[Detection] = []
 
     # ── Public API ────────────────────────────────────────────────────────────
 
-    def update(self, detections: List[Detection]) -> List[Detection]:
+    def update(self, detections: List[Detection], frame: np.ndarray | None = None) -> List[Detection]:
         """
         Feed detections into ByteTrack. Call on detection frames only.
 
-        Returns a new list of Detections where confirmed players have their
-        track_id set. Unconfirmed players and non-player detections pass
-        through with track_id=-1.
+        `frame` is accepted for call-site compatibility (and a future CMC option)
+        but unused — supervision ByteTrack has no camera-motion compensation.
+
+        Returns a new list where tracked players carry their track_id. Players
+        below min_conf and non-trackable detections pass through with track_id=-1.
         """
-        players  = [d for d in detections if d.class_name in _TRACKABLE]
-        others   = [d for d in detections if d.class_name not in _TRACKABLE]
+        players: List[Detection] = []
+        passthrough: List[Detection] = []
+        for d in detections:
+            if d.class_name in _TRACKABLE and d.confidence >= self._min_conf:
+                players.append(d)
+            else:
+                passthrough.append(d)
 
         if not players:
-            result = list(others)
+            result = list(passthrough)
             self._last_result = result
             return result
 
@@ -75,28 +91,22 @@ class PlayerTracker:
 
         sv_out = self._byte.update_with_detections(sv_in)
 
-        # Build xyxy → tracker_id lookup for confirmed tracks
+        # supervision returns only confirmed tracks, reordered → map by bbox key.
         tid_map: dict[tuple, int] = {}
-        if sv_out.tracker_id is not None and len(sv_out) > 0:
+        if sv_out.tracker_id is not None:
             for i in range(len(sv_out)):
-                key = tuple(sv_out.xyxy[i].astype(int))
-                tid_map[key] = int(sv_out.tracker_id[i])
+                tid_map[tuple(sv_out.xyxy[i].astype(int))] = int(sv_out.tracker_id[i])
 
-        tracked: List[Detection] = []
-        for det in players:
-            key = tuple(int(v) for v in det.bbox)
-            tid = tid_map.get(key, -1)
-            tracked.append(replace(det, track_id=tid))
-
-        result = tracked + list(others)
+        tracked = [
+            replace(det, track_id=tid_map.get(tuple(int(v) for v in det.bbox), -1))
+            for det in players
+        ]
+        result = tracked + list(passthrough)
         self._last_result = result
         return result
 
     def carry_forward(self) -> List[Detection]:
-        """
-        Return the last update() result unchanged.
-        Call on skip frames so callers always get a Detection list.
-        """
+        """Return the last update() result unchanged (for skip frames)."""
         return self._last_result
 
     def reset(self) -> None:
