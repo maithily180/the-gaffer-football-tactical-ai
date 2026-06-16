@@ -79,6 +79,7 @@ class FootballDetector:
         self,
         model_path: str | Path | None = None,
         conf: float = config.DETECTION_CONF_THRESHOLD,
+        ball_conf: float = config.BALL_CONF_THRESHOLD,
         imgsz: int = config.DETECTION_IMG_SIZE,
         detect_every_n: int = config.DETECT_EVERY_N_FRAMES,
         verbose: bool = False,
@@ -93,6 +94,10 @@ class FootballDetector:
 
         self.model_path   = Path(model_path)
         self.conf         = conf
+        self.ball_conf    = ball_conf
+        # YOLO call uses the lowest per-class floor so weak ball detections
+        # make it past NMS; _parse() then applies class-specific thresholds.
+        self._yolo_conf   = min(conf, ball_conf)
         self.imgsz        = imgsz
         self.detect_every_n = detect_every_n
         self._verbose     = verbose
@@ -109,7 +114,7 @@ class FootballDetector:
 
         # Warm-up so first real call isn't slow
         _dummy = np.zeros((480, 640, 3), dtype=np.uint8)
-        self._model(_dummy, conf=self.conf, imgsz=self.imgsz, verbose=False)
+        self._model(_dummy, conf=self._yolo_conf, imgsz=self.imgsz, verbose=False)
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -121,7 +126,7 @@ class FootballDetector:
         """
         if frame_idx - self._last_detect_idx >= self.detect_every_n:
             results = self._model(
-                frame, conf=self.conf, imgsz=self.imgsz, verbose=False
+                frame, conf=self._yolo_conf, imgsz=self.imgsz, verbose=False
             )[0]
             self._cache = self._parse(results)
             self._last_detect_idx = frame_idx
@@ -129,7 +134,7 @@ class FootballDetector:
 
     def detect_raw(self, frame: np.ndarray) -> List[Detection]:
         """Force inference regardless of frame index. Useful for single-frame analysis."""
-        results = self._model(frame, conf=self.conf, imgsz=self.imgsz, verbose=False)[0]
+        results = self._model(frame, conf=self._yolo_conf, imgsz=self.imgsz, verbose=False)[0]
         return self._parse(results)
 
     @property
@@ -163,6 +168,12 @@ class FootballDetector:
                 if raw_cls not in self._COCO_MAP:
                     continue
                 cls_id, cls_name = self._COCO_MAP[raw_cls]
+
+            # Per-class confidence floor: ball uses the lower threshold so
+            # weak detections (~0.10) survive where players need >= 0.25.
+            cls_floor = self.ball_conf if cls_id == config.CLASS_BALL else self.conf
+            if conf < cls_floor:
+                continue
 
             detections.append(Detection(
                 bbox=(int(x1), int(y1), int(x2), int(y2)),

@@ -63,12 +63,45 @@ PITCH_KEYPOINTS = {
 }
 
 # ─── Detection ────────────────────────────────────────────────────────────────
-DETECTION_CONF_THRESHOLD = 0.25  # low floor keeps ball (~0.10/frame) & referees in view
+DETECTION_CONF_THRESHOLD = 0.25  # player / GK / referee floor
+BALL_CONF_THRESHOLD = 0.10       # ball is tiny (5-15px); needs lower floor than players
 DETECTION_IOU_THRESHOLD = 0.45
 DETECTION_IMG_SIZE = 640       # 640 for OpenVINO on Intel Arc; 1280 on NVIDIA
 # Day 5 audit: every-frame detection INCREASED visible ID switching (carry-forward
 # at skip-3 holds IDs steadier) and cost 3×. Kept skip-3.
 DETECT_EVERY_N_FRAMES = 3
+
+# ─── Ball tracking ────────────────────────────────────────────────────────────
+BALL_MAX_INTERP_FRAMES = 15     # extrapolate/interpolate ball gaps up to 15 frames (~0.6s @ 25fps)
+BALL_SMOOTH_ALPHA = 0.45        # EMA weight for new ball position (higher = more responsive)
+
+# ─── Ball candidate filtering ─────────────────────────────────────────────────
+# Stationary-object filter: penalty spots / white lines appear at same location
+# every detection frame. A real ball is always moving.
+BALL_STATIONARY_MOVE_PX = 8     # displacement below this counts as "not moved"
+BALL_STATIONARY_MIN_FRAMES = 10 # reject if stationary for this many detection frames
+BALL_STATIONARY_WINDOW = 30     # detection-frame window to check
+# Player-proximity filter: a lone ball near the stands is almost certainly a false positive.
+# Relaxed when the ball was moving fast (long kick / in-air).
+BALL_PROXIMITY_THRESHOLD_PX = 450   # max pixel distance from nearest player
+BALL_IN_AIR_SPEED_PX = 10           # px/detection-frame above which proximity is relaxed
+
+# Spatial gate: reject any candidate that cannot be reached from the last known
+# ball position at a physically plausible speed.
+# Gate radius = BASE + prev_speed * SPEED_MULT + missed_dframes * MISS_GROWTH
+# capped at MAX.  After a scene cut the gate is reset (no prior position assumed).
+BALL_SPATIAL_GATE_BASE_PX    = 60   # minimum gate even for a stationary ball (jitter + slow touch)
+BALL_SPATIAL_GATE_SPEED_MULT = 1.4  # gate grows with measured ball speed
+BALL_SPATIAL_GATE_MISS_GROWTH = 30  # px added per missed detection frame (uncertainty grows)
+BALL_SPATIAL_GATE_MAX_PX     = 320  # hard ceiling — no teleportation across the pitch
+# Scene-cut detection: large histogram difference between consecutive frames
+# means a camera cut; spatial gate is reset so we don't reject the first
+# valid detection in the new shot.
+BALL_SCENE_CUT_THRESHOLD    = 0.40  # normalised histogram diff above this → cut detected
+# Recovery mode: after losing the ball for this many detection frames, relax
+# the spatial gate and reacquire near the tightest player cluster.
+BALL_RECOVERY_FRAMES        = 5     # detection frames of loss before recovery mode
+BALL_CLUSTER_RADIUS_PX      = 150   # in recovery mode, candidate must be within this of cluster
 
 CLASS_PLAYER = 0
 CLASS_GOALKEEPER = 1

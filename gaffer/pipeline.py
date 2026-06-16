@@ -27,6 +27,8 @@ from gaffer import config
 from gaffer.detection.detector import FootballDetector
 from gaffer.detection.team_assigner import TeamAssigner
 from gaffer.output.annotator import Annotator
+from gaffer.tracking.ball_candidate_filter import BallCandidateFilter
+from gaffer.tracking.ball_tracker import BallTracker
 from gaffer.tracking.position_store import PositionStore
 from gaffer.tracking.tracker import PlayerTracker
 from gaffer.video.loader import VideoLoader
@@ -109,9 +111,11 @@ class GafferPipeline:
         print(f"  TeamAssigner fitted: {assigner.n_fit_samples} jersey crops  "
               f"cluster→team {assigner.cluster_to_team}")
 
-        tracker  = PlayerTracker(fps=loader.fps)
-        store    = PositionStore(fps=loader.fps)
-        annotator = Annotator()
+        tracker      = PlayerTracker(fps=loader.fps)
+        ball_tracker = BallTracker()
+        ball_filter  = BallCandidateFilter()
+        store        = PositionStore(fps=loader.fps)
+        annotator    = Annotator()
 
         # ── 2. Main loop ──────────────────────────────────────────────────────
         print(f"Processing {n_frames} frames …")
@@ -131,11 +135,25 @@ class GafferPipeline:
                 dets = detector.detect(frame, frame_idx)
                 dets = assigner.assign(frame, dets)
 
-                if frame_idx == detector._last_detect_idx:
-                    dets = tracker.update(dets, frame)   # frame → BoT-SORT camera-motion comp
-                else:
-                    dets = tracker.carry_forward()
+                # Split ball from field players so each tracker handles its own class.
+                ball_dets  = [d for d in dets if d.class_name == "ball"]
+                field_dets = [d for d in dets if d.class_name != "ball"]
 
+                if frame_idx == detector._last_detect_idx:
+                    field_dets = tracker.update(field_dets, frame)
+                    ball_dets  = ball_filter.filter(
+                        ball_dets, field_dets, frame_idx,
+                        last_ball_pos=ball_tracker.last_position_px(),
+                        last_ball_vel=ball_tracker.last_velocity_vector(),
+                        last_detection_frame=ball_tracker.last_detection_frame(),
+                    )
+                    ball_result = ball_tracker.update(ball_dets, frame_idx)
+                else:
+                    field_dets  = tracker.carry_forward()
+                    # On skip frames, feed empty list so BallTracker extrapolates.
+                    ball_result = ball_tracker.update([], frame_idx)
+
+                dets = field_dets + ([ball_result] if ball_result is not None else [])
                 store.update(frame_idx, dets)
                 elapsed = time.perf_counter() - t0
 

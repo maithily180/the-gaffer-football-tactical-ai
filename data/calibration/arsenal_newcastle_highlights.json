@@ -1,0 +1,50 @@
+{
+  "clip": "arsenal_newcastle_highlights.mp4",
+  "frame_idx": 750,
+  "fps": 25.0,
+  "image_points": {
+    "left_penalty_spot": [
+      30,
+      246
+    ],
+    "left_penalty_box_tr": [
+      460,
+      155
+    ],
+    "left_six_yard_tr": [
+      26,
+      185
+    ],
+    "left_arc_apex": [
+      321,
+      266
+    ],
+    "left_penalty_box_tl": [
+      57,
+      128
+    ],
+    "left_corner_top": [
+      232,
+      83
+    ]
+  },
+  "homography": [
+    [
+      0.0450927295806933,
+      0.17510428284413973,
+      -24.936773708213053
+    ],
+    [
+      -0.022780729902771708,
+      0.34243077324201465,
+      -23.190465208142225
+    ],
+    [
+      -0.00021106567956350584,
+      0.0031957328654942754,
+      1.0
+    ]
+  ],
+  "reprojection_mean_px": 2.1240272983256276,
+  "reprojection_max_px": 3.6933975481262484
+}
