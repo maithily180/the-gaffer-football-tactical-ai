@@ -44,6 +44,8 @@ from gaffer.analytics.voronoi import compute_voronoi_control
 from gaffer.calibration.homography_manager import HomographyManager
 from gaffer.calibration.pitch_visibility import PitchVisibility, PitchVisibilityEstimator
 from gaffer.detection.detector import Detection
+from gaffer.events.base import FootballEvent
+from gaffer.events.detector import EventDetector
 
 
 @dataclass
@@ -64,16 +66,19 @@ class TeamShape:
 
 @dataclass
 class AnalyticsSnapshot:
-    frame_idx:       int
-    ball_xy:         tuple[float, float] | None
-    team_a:          TeamShape
-    team_b:          TeamShape
-    possession:      PossessionState
-    voronoi:         dict
-    pressing:        dict | None = None
-    positions:       dict = field(default_factory=dict)   # {"teamA":[(x,y)..], "teamB":[..]}
-    visibility:      PitchVisibility | None = None         # what pitch region is on screen
-    ball_region:     str | None = None                     # left/middle/right third
+    frame_idx:          int
+    ball_xy:            tuple[float, float] | None
+    team_a:             TeamShape
+    team_b:             TeamShape
+    possession:         PossessionState
+    voronoi:            dict
+    pressing:           dict | None = None
+    positions:          dict = field(default_factory=dict)       # {"teamA":[(x,y)..], "teamB":[..]}
+    player_positions_m: dict = field(default_factory=dict)       # track_id -> (x, y)
+    player_teams:       dict = field(default_factory=dict)       # track_id -> "teamA"|"teamB"
+    visibility:         PitchVisibility | None = None
+    ball_region:        str | None = None
+    events:             List[FootballEvent] = field(default_factory=list)
 
 
 class PitchAnalyticsEngine:
@@ -93,6 +98,7 @@ class PitchAnalyticsEngine:
         self._fps = fps
         self._press_r = pressing_radius_m
         self._possession = PossessionTracker()
+        self._event_detector = EventDetector(fps=fps)
         self._last: AnalyticsSnapshot | None = None
         self._vis_est = (
             PitchVisibilityEstimator(image_size[0], image_size[1])
@@ -111,7 +117,7 @@ class PitchAnalyticsEngine:
         if not self.mgr.is_valid():
             return None
 
-        team_a_pos, team_b_pos = self._project_players(detections)
+        team_a_pos, team_b_pos, player_pos_m, player_teams = self._project_players(detections)
         ball_xy = self._project_ball(detections)
 
         # Attack directions from relative centroids (heuristic, see module doc)
@@ -142,17 +148,20 @@ class PitchAnalyticsEngine:
         )
 
         snap = AnalyticsSnapshot(
-            frame_idx  = frame_idx,
-            ball_xy    = ball_xy,
-            team_a     = shape_a,
-            team_b     = shape_b,
-            possession = poss,
-            voronoi    = voronoi,
-            pressing   = pressing,
-            positions  = {"teamA": team_a_pos, "teamB": team_b_pos},
-            visibility = visibility,
-            ball_region = ball_region,
+            frame_idx          = frame_idx,
+            ball_xy            = ball_xy,
+            team_a             = shape_a,
+            team_b             = shape_b,
+            possession         = poss,
+            voronoi            = voronoi,
+            pressing           = pressing,
+            positions          = {"teamA": team_a_pos, "teamB": team_b_pos},
+            player_positions_m = player_pos_m,
+            player_teams       = player_teams,
+            visibility         = visibility,
+            ball_region        = ball_region,
         )
+        snap.events = self._event_detector.update(snap)
         self._last = snap
         return snap
 
@@ -176,10 +185,23 @@ class PitchAnalyticsEngine:
 
     def _project_players(
         self, detections: List[Detection]
-    ) -> tuple[list[tuple[float, float]], list[tuple[float, float]]]:
-        """Project player/GK foot points to pitch metres, grouped by team_id."""
+    ) -> tuple[
+        list[tuple[float, float]],
+        list[tuple[float, float]],
+        dict[int, tuple[float, float]],
+        dict[int, str],
+    ]:
+        """
+        Project player/GK foot points to pitch metres.
+
+        Returns (team_a_list, team_b_list, per_player_positions, per_player_teams).
+        per_player_positions maps track_id → (x_m, y_m) for tracked players.
+        """
         team_a: list[tuple[float, float]] = []
         team_b: list[tuple[float, float]] = []
+        player_pos:   dict[int, tuple[float, float]] = {}
+        player_teams: dict[int, str] = {}
+
         for det in detections:
             if det.class_name not in ("player", "goalkeeper"):
                 continue
@@ -188,8 +210,13 @@ class PitchAnalyticsEngine:
             world = self.mgr.project(det.foot_point)
             if world is None or not self.mgr.on_pitch(*world, margin_m=2.0):
                 continue
+            team_name = "teamA" if det.team_id == 0 else "teamB"
             (team_a if det.team_id == 0 else team_b).append(world)
-        return team_a, team_b
+            if det.track_id is not None and det.track_id >= 0:
+                player_pos[det.track_id]   = world
+                player_teams[det.track_id] = team_name
+
+        return team_a, team_b, player_pos, player_teams
 
     def _project_ball(self, detections: List[Detection]) -> tuple[float, float] | None:
         for det in detections:

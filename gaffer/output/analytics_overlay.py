@@ -13,23 +13,33 @@ Pure rendering; consumes the dataclasses produced by PitchAnalyticsEngine.
 
 from __future__ import annotations
 
+from collections import deque
+
 import cv2
 import numpy as np
 
 from gaffer import config
 from gaffer.analytics.engine import AnalyticsSnapshot
 from gaffer.calibration.pitch_model import PitchModel
+from gaffer.events.base import FootballEvent
 
-_A_CLR = config.TEAM_A_COLOR_BGR     # red
-_B_CLR = config.TEAM_B_COLOR_BGR     # blue
-_HUD   = (0, 220, 60)                # green
-_GREY  = (160, 160, 160)
+_A_CLR  = config.TEAM_A_COLOR_BGR     # red
+_B_CLR  = config.TEAM_B_COLOR_BGR     # blue
+_HUD    = (0, 220, 60)                # green
+_GREY   = (160, 160, 160)
+_YELLOW = (0, 220, 220)               # highlight events
+
+
+_MAX_TICKER = 6       # max events shown in the ticker
+_TICKER_TTL = 120    # frames an event stays in the ticker (~5s @ 25fps)
 
 
 class AnalyticsOverlay:
     def __init__(self, pitch_model: PitchModel | None = None):
         self.pm = pitch_model or PitchModel()
         self._base_pitch = self.pm.draw_pitch()
+        # (event, expire_frame) — newest first
+        self._ticker: deque[tuple[FootballEvent, int]] = deque(maxlen=_MAX_TICKER)
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -40,7 +50,7 @@ class AnalyticsOverlay:
         *,
         voronoi_width: int = 360,
     ) -> np.ndarray:
-        """Return a copy of `frame` with the stats panel and Voronoi inset drawn."""
+        """Return a copy of `frame` with the stats panel, Voronoi inset, and event ticker."""
         out = frame.copy()
         if snap is None:
             cv2.putText(out, "ANALYTICS: no calibration", (16, 32),
@@ -48,6 +58,8 @@ class AnalyticsOverlay:
             return out
         self._draw_panel(out, snap)
         self._draw_voronoi_inset(out, snap, voronoi_width)
+        self._update_ticker(snap)
+        self._draw_ticker(out, snap.frame_idx)
         return out
 
     # ── Stats panel ───────────────────────────────────────────────────────────
@@ -163,6 +175,43 @@ class AnalyticsOverlay:
             cv2.circle(img, (bx, by), 5, (0, 0, 0), 1)
 
         return img
+
+    # ── Event ticker ──────────────────────────────────────────────────────────
+
+    def _update_ticker(self, snap: AnalyticsSnapshot) -> None:
+        """Add new events from this snap and keep only unexpired entries."""
+        for ev in snap.events:
+            self._ticker.appendleft((ev, snap.frame_idx + _TICKER_TTL))
+
+    def _draw_ticker(self, frame: np.ndarray, current_frame: int) -> None:
+        """Draw a slim event log at the bottom-left of the frame."""
+        active = [(ev, exp) for ev, exp in self._ticker if exp > current_frame]
+        if not active:
+            return
+
+        H, W = frame.shape[:2]
+        line_h = 22
+        pad    = 8
+        box_h  = pad * 2 + line_h * len(active)
+        y_base = H - 10 - box_h
+        box_w  = 260
+
+        overlay = frame.copy()
+        cv2.rectangle(overlay, (10, y_base), (10 + box_w, y_base + box_h), (0, 0, 0), -1)
+        cv2.addWeighted(overlay, 0.55, frame, 0.45, 0, frame)
+
+        for i, (ev, exp) in enumerate(active):
+            fade   = min(1.0, (exp - current_frame) / 40)   # fade out in last 40 frames
+            bright = int(230 * fade)
+            t_str  = f"{ev.time_s:5.1f}s  {ev.label()}"
+            colour = (
+                (_YELLOW[0], _YELLOW[1], bright)  # yellow-ish highlight for big events
+                if ev.is_highlight else
+                (bright, bright, bright)
+            )
+            y = y_base + pad + (i + 1) * line_h - 4
+            cv2.putText(frame, t_str, (10 + pad, y),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.44, colour, 1, cv2.LINE_AA)
 
 
 def _fmt(v: float | None) -> str:
