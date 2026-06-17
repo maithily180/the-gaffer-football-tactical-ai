@@ -78,6 +78,12 @@ class AnalyticsOverlay:
             lines.append(("TXT",
                 f"Press: {snap.pressing['intensity']} on {owner_lbl}  "
                 f"(near {snap.pressing['nearest_dist_m']}m)"))
+        if snap.visibility is not None:
+            v = snap.visibility
+            lines.append(("SEP", ""))
+            lines.append(("TXT", f"View : {_regions_short(v.regions_visible)} ({v.coverage_pct:.0f}%)"))
+            if snap.ball_region is not None:
+                lines.append(("TXT", f"Ball : {snap.ball_region.replace('_',' ')}"))
 
         pad, line_h = 10, 20
         box_w = 290
@@ -161,3 +167,9 @@ class AnalyticsOverlay:
 
 def _fmt(v: float | None) -> str:
     return "--" if v is None else f"{v:.0f}"
+
+
+def _regions_short(regions: list[str]) -> str:
+    """['left_third','middle_third'] → 'L+M'."""
+    m = {"left_third": "L", "middle_third": "M", "right_third": "R"}
+    return "+".join(m.get(r, "?") for r in regions) or "--"

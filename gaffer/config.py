@@ -113,6 +113,14 @@ BALL_APPROACH_DOT_THRESH       = 0.35  # dot product floor: "player moving towar
 BALL_SUSPECT_NO_APPROACH_FRAMES = 8    # consecutive det-frames with 0 voters → suspect
 BALL_SUSPECT_MIN_TRACK_FRAMES  = 5     # don't declare suspect until tracked this long
 
+# ─── Pitch visibility (Problem A: what part of the pitch is on screen) ─────────
+# Project a grid of image points through H; keep those landing on-pitch; the
+# convex hull of those points is the visible-pitch region. Robust to the horizon
+# (image points above it project off-pitch and are simply dropped).
+PITCH_VIS_GRID = 13                 # NxN grid of image points to project (169 pts)
+PITCH_VIS_MARGIN_M = 2.0            # keep projections within pitch + this margin
+PITCH_VIS_MIN_POINTS = 6           # below this many on-pitch points → view unreliable
+
 CLASS_PLAYER = 0
 CLASS_GOALKEEPER = 1
 CLASS_REFEREE = 2

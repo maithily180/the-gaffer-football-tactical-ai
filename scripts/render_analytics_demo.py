@@ -90,7 +90,8 @@ def main() -> None:
     ball_tracker    = BallTracker()
     ball_filter     = BallCandidateFilter()
     ball_state      = BallStateEstimator()
-    engine          = PitchAnalyticsEngine(mgr, fps=loader.fps)
+    engine          = PitchAnalyticsEngine(mgr, fps=loader.fps,
+                                           image_size=(loader.width, loader.height))
     overlay         = AnalyticsOverlay()
 
     print(f"Clip    : {clip_path.name}")

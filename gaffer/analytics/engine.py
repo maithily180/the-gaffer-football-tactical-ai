@@ -42,6 +42,7 @@ from gaffer.analytics.possession import PossessionState, PossessionTracker
 from gaffer.analytics.pressing import compute_pressing_intensity
 from gaffer.analytics.voronoi import compute_voronoi_control
 from gaffer.calibration.homography_manager import HomographyManager
+from gaffer.calibration.pitch_visibility import PitchVisibility, PitchVisibilityEstimator
 from gaffer.detection.detector import Detection
 
 
@@ -71,6 +72,8 @@ class AnalyticsSnapshot:
     voronoi:         dict
     pressing:        dict | None = None
     positions:       dict = field(default_factory=dict)   # {"teamA":[(x,y)..], "teamB":[..]}
+    visibility:      PitchVisibility | None = None         # what pitch region is on screen
+    ball_region:     str | None = None                     # left/middle/right third
 
 
 class PitchAnalyticsEngine:
@@ -84,12 +87,19 @@ class PitchAnalyticsEngine:
         homography_manager: HomographyManager,
         fps: float = config.DEFAULT_FPS,
         pressing_radius_m: float = config.PRESSING_RADIUS_M,
+        image_size: tuple[int, int] | None = None,    # (w, h) → enables visibility
     ):
         self.mgr  = homography_manager
         self._fps = fps
         self._press_r = pressing_radius_m
         self._possession = PossessionTracker()
         self._last: AnalyticsSnapshot | None = None
+        self._vis_est = (
+            PitchVisibilityEstimator(image_size[0], image_size[1])
+            if image_size is not None else None
+        )
+        self._vis_cache: PitchVisibility | None = None
+        self._vis_cache_key: int | None = None      # id of the H it was computed for
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -122,6 +132,15 @@ class PitchAnalyticsEngine:
                 radius_m=self._press_r,
             )
 
+        # Problem A — what part of the pitch is on screen + which third the ball is in.
+        # Visibility is a pure function of H; cache it and recompute only when H
+        # changes (i.e. once dynamic-H / Step 2 lands). Static H → computed once.
+        visibility = self._visibility()
+        ball_region = (
+            self._vis_est.region_of(ball_xy[0])
+            if (self._vis_est and ball_xy is not None) else None
+        )
+
         snap = AnalyticsSnapshot(
             frame_idx  = frame_idx,
             ball_xy    = ball_xy,
@@ -131,6 +150,8 @@ class PitchAnalyticsEngine:
             voronoi    = voronoi,
             pressing   = pressing,
             positions  = {"teamA": team_a_pos, "teamB": team_b_pos},
+            visibility = visibility,
+            ball_region = ball_region,
         )
         self._last = snap
         return snap
@@ -138,6 +159,15 @@ class PitchAnalyticsEngine:
     @property
     def last(self) -> AnalyticsSnapshot | None:
         return self._last
+
+    def _visibility(self) -> PitchVisibility | None:
+        if self._vis_est is None or not self.mgr.is_valid():
+            return None
+        key = id(self.mgr.H)
+        if key != self._vis_cache_key:
+            self._vis_cache = self._vis_est.estimate(self.mgr)
+            self._vis_cache_key = key
+        return self._vis_cache
 
     def possession_summary(self) -> dict:
         return self._possession.summary()
