@@ -54,6 +54,7 @@ import numpy as np
 from gaffer import config
 from gaffer.detection.detector import Detection
 from gaffer.tracking.ball_state_estimator import BallState, BallStateEstimator
+from gaffer.tracking.world_model import BallWorldModel
 
 
 class BallCandidateFilter:
@@ -122,6 +123,7 @@ class BallCandidateFilter:
         last_ball_vel: tuple[float, float] | None = None,   # (vx, vy) px/det-frame
         last_detection_frame: int | None          = None,
         state_estimator: BallStateEstimator | None = None,
+        world_model: BallWorldModel | None        = None,
     ) -> List[Detection]:
         """
         Return at most one ball Detection: the best candidate that passes all
@@ -162,8 +164,12 @@ class BallCandidateFilter:
             ball_state=state_estimator.state if state_estimator else None,
         )
 
-        # Player cluster centre (used for scoring + recovery reacquisition)
+        # Player cluster centre (used for scoring + recovery reacquisition).
+        # WorldModel overrides this with the possession carrier's position when available
+        # — far more targeted than the tightest generic cluster.
         cluster  = self._player_cluster(field_dets)
+        if world_model is not None and homography_manager is not None:
+            cluster = world_model.recovery_anchor_px(cluster, homography_manager) or cluster
 
         passed: List[Detection] = []
 
@@ -226,22 +232,32 @@ class BallCandidateFilter:
             return []   # no approach-backed candidate — stay lost rather than guess
 
         # ── Select best candidate ──────────────────────────────────────────────
-        # Confidence is primary. On ties within 85% band, break by:
-        #   1. Approach voters (most players moving toward candidate wins)
-        #   2. Distance to player cluster (closer is better)
-        best_conf = max(d.confidence for d in passed)
-        top_tier  = [d for d in passed if d.confidence >= best_conf * 0.85]
-
-        if len(top_tier) == 1:
-            best_det = top_tier[0]
+        # Without world model: confidence primary, approach-voters + cluster tiebreaker.
+        # With world model: world-model-boosted effective confidence for all candidates.
+        #   effective_conf = conf * (1 + WM_WEIGHT * (wm_score - 0.5))
+        # This lets a tactically correct lower-conf detection beat a wrong-position
+        # high-conf one, while still heavily weighting the detector.
+        if world_model is not None and homography_manager is not None and homography_manager.is_valid():
+            best_det = max(
+                passed,
+                key=lambda d: world_model.effective_confidence(
+                    d.confidence, d.center, homography_manager
+                ),
+            )
         else:
-            def _score(d: Detection) -> tuple:
-                voters = (
-                    state_estimator.approach_voters(d.center, field_dets)
-                    if state_estimator else 0
-                )
-                return (voters, -self._dist_to_cluster(d, cluster))
-            best_det = max(top_tier, key=_score)
+            # Original scoring: confidence primary, tiebreaker by voters + cluster
+            best_conf = max(d.confidence for d in passed)
+            top_tier  = [d for d in passed if d.confidence >= best_conf * 0.85]
+            if len(top_tier) == 1:
+                best_det = top_tier[0]
+            else:
+                def _score(d: Detection) -> tuple:
+                    voters = (
+                        state_estimator.approach_voters(d.center, field_dets)
+                        if state_estimator else 0
+                    )
+                    return (voters, -self._dist_to_cluster(d, cluster))
+                best_det = max(top_tier, key=_score)
 
         if in_recovery:
             self.n_recovery_accepted += 1

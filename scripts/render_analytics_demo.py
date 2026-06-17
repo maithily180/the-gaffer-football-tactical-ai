@@ -44,6 +44,7 @@ from gaffer.tracking.ball_candidate_filter import BallCandidateFilter
 from gaffer.tracking.ball_state_estimator import BallStateEstimator
 from gaffer.tracking.ball_tracker import BallTracker
 from gaffer.tracking.tracker import PlayerTracker
+from gaffer.tracking.world_model import BallWorldModel
 from gaffer.video.loader import VideoLoader
 from gaffer.video.writer import VideoWriter
 
@@ -93,6 +94,7 @@ def main() -> None:
     ball_tracker    = BallTracker()
     ball_filter     = BallCandidateFilter()
     ball_state      = BallStateEstimator()
+    world_model     = BallWorldModel(fps=loader.fps)
     engine          = PitchAnalyticsEngine(mgr, fps=loader.fps,
                                            image_size=(loader.width, loader.height))
     overlay         = AnalyticsOverlay()
@@ -136,6 +138,7 @@ def main() -> None:
                     last_ball_vel=ball_tracker.last_velocity_vector(),
                     last_detection_frame=ball_tracker.last_detection_frame(),
                     state_estimator=ball_state,
+                    world_model=world_model,
                 )
                 ball_result = ball_tracker.update(ball_dets, frame_idx)
                 state_det = (ball_result if ball_result is not None
@@ -147,6 +150,10 @@ def main() -> None:
                 # frames — recomputing on carry-forward positions is pure waste.
                 all_dets = field_dets + ([ball_result] if ball_result is not None else [])
                 snap = engine.update(frame_idx, all_dets)
+                # World model updates AFTER analytics so it has the full snapshot
+                # (including events) — its context is used on the NEXT frame's filter.
+                if snap is not None:
+                    world_model.update(snap, mgr)
             else:
                 snap = engine.last
 
