@@ -36,6 +36,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from gaffer import config
 from gaffer.analytics.engine import PitchAnalyticsEngine
 from gaffer.calibration.homography_manager import HomographyManager
+from gaffer.calibration.homography_propagator import HomographyPropagator
 from gaffer.detection.detector import FootballDetector
 from gaffer.detection.team_assigner import TeamAssigner
 from gaffer.output.analytics_overlay import AnalyticsOverlay
@@ -55,6 +56,8 @@ def main() -> None:
     ap.add_argument("--calib",    default=None,
                     help="Calibration JSON (auto-detected from clip stem if omitted)")
     ap.add_argument("--out",      default=None)
+    ap.add_argument("--no-propagate", action="store_true",
+                    help="Disable optical-flow homography propagation (use static H)")
     args = ap.parse_args()
 
     clip_path = Path(args.clip)
@@ -93,10 +96,12 @@ def main() -> None:
     engine          = PitchAnalyticsEngine(mgr, fps=loader.fps,
                                            image_size=(loader.width, loader.height))
     overlay         = AnalyticsOverlay()
+    propagator      = None if args.no_propagate else HomographyPropagator(mgr)
 
     print(f"Clip    : {clip_path.name}")
     print(f"Window  : {args.start:.0f}s – {args.start + args.duration:.0f}s  ({n_frames} frames)")
     print(f"Output  : {out_path}")
+    print(f"Homography : {'STATIC' if args.no_propagate else 'PROPAGATED (optical flow)'}")
     print("Processing …")
 
     timings: list[float] = []
@@ -114,6 +119,11 @@ def main() -> None:
             dets       = assigner.assign(frame, dets)
             ball_dets  = [d for d in dets if d.class_name == "ball"]
             field_dets = [d for d in dets if d.class_name != "ball"]
+
+            # Problem B: advance H to this frame's camera pose BEFORE projecting.
+            # Mask out players/ball (independent motion) — keep pitch + crowd.
+            if propagator is not None:
+                propagator.update(frame, exclude_dets=dets)
 
             is_detect_frame = (frame_idx == detector._last_detect_idx)
 
@@ -179,6 +189,11 @@ def main() -> None:
     if n_press:
         print(f"  Mean press on ball : {sum_press/n_press:.1f} opponents within "
               f"{config.PRESSING_RADIUS_M:.0f}m")
+    if propagator is not None:
+        s = propagator.summary()
+        print()
+        print(f"  H propagation      : {s['updates']} updates, {s['holds']} holds, "
+              f"{s['cuts']} scene cuts")
     print()
     print(f"  Output : {out_path}  ({size_mb:.1f} MB)")
     print("=" * 54)

@@ -113,6 +113,20 @@ BALL_APPROACH_DOT_THRESH       = 0.35  # dot product floor: "player moving towar
 BALL_SUSPECT_NO_APPROACH_FRAMES = 8    # consecutive det-frames with 0 voters → suspect
 BALL_SUSPECT_MIN_TRACK_FRAMES  = 5     # don't declare suspect until tracked this long
 
+# ─── Homography propagation (Problem B: keep H locked to pitch under motion) ───
+# Lucas-Kanade tracks static-world features (pitch + crowd) frame-to-frame;
+# players/ball are masked out (they move independently). Inter-frame image
+# homography A is estimated by RANSAC, then H_new = H_old @ inv(A).
+HPROP_MAX_CORNERS    = 300
+HPROP_QUALITY        = 0.01
+HPROP_MIN_DISTANCE   = 12
+HPROP_MIN_FEATURES   = 25      # below this many tracked inliers → hold H, reseed
+HPROP_LK_WINSIZE     = 21
+HPROP_LK_MAXLEVEL    = 3
+HPROP_MASK_DILATE_PX = 14      # dilate player/ball boxes by this when masking out
+HPROP_MAX_SCALE_STEP = 1.25    # reject inter-frame H with |scale| outside [1/x, x]
+HPROP_SCENE_CUT_THRESHOLD = 0.40   # Bhattacharyya hist diff above this → cut → hold H
+
 # ─── Pitch visibility (Problem A: what part of the pitch is on screen) ─────────
 # Project a grid of image points through H; keep those landing on-pitch; the
 # convex hull of those points is the visible-pitch region. Robust to the horizon
