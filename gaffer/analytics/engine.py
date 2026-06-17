@@ -76,6 +76,7 @@ class AnalyticsSnapshot:
     positions:          dict = field(default_factory=dict)       # {"teamA":[(x,y)..], "teamB":[..]}
     player_positions_m: dict = field(default_factory=dict)       # track_id -> (x, y)
     player_teams:       dict = field(default_factory=dict)       # track_id -> "teamA"|"teamB"
+    player_is_gk:       dict = field(default_factory=dict)       # track_id -> bool
     visibility:         PitchVisibility | None = None
     ball_region:        str | None = None
     events:             List[FootballEvent] = field(default_factory=list)
@@ -117,7 +118,7 @@ class PitchAnalyticsEngine:
         if not self.mgr.is_valid():
             return None
 
-        team_a_pos, team_b_pos, player_pos_m, player_teams = self._project_players(detections)
+        team_a_pos, team_b_pos, player_pos_m, player_teams, player_is_gk = self._project_players(detections)
         ball_xy = self._project_ball(detections)
 
         # Attack directions from relative centroids (heuristic, see module doc)
@@ -158,6 +159,7 @@ class PitchAnalyticsEngine:
             positions          = {"teamA": team_a_pos, "teamB": team_b_pos},
             player_positions_m = player_pos_m,
             player_teams       = player_teams,
+            player_is_gk       = player_is_gk,
             visibility         = visibility,
             ball_region        = ball_region,
         )
@@ -190,17 +192,19 @@ class PitchAnalyticsEngine:
         list[tuple[float, float]],
         dict[int, tuple[float, float]],
         dict[int, str],
+        dict[int, bool],
     ]:
         """
         Project player/GK foot points to pitch metres.
 
-        Returns (team_a_list, team_b_list, per_player_positions, per_player_teams).
-        per_player_positions maps track_id → (x_m, y_m) for tracked players.
+        Returns (team_a_list, team_b_list, per_player_positions, per_player_teams,
+        per_player_is_gk).  per_player_positions maps track_id → (x_m, y_m).
         """
         team_a: list[tuple[float, float]] = []
         team_b: list[tuple[float, float]] = []
         player_pos:   dict[int, tuple[float, float]] = {}
         player_teams: dict[int, str] = {}
+        player_is_gk: dict[int, bool] = {}
 
         for det in detections:
             if det.class_name not in ("player", "goalkeeper"):
@@ -215,8 +219,9 @@ class PitchAnalyticsEngine:
             if det.track_id is not None and det.track_id >= 0:
                 player_pos[det.track_id]   = world
                 player_teams[det.track_id] = team_name
+                player_is_gk[det.track_id] = (det.class_name == "goalkeeper")
 
-        return team_a, team_b, player_pos, player_teams
+        return team_a, team_b, player_pos, player_teams, player_is_gk
 
     def _project_ball(self, detections: List[Detection]) -> tuple[float, float] | None:
         for det in detections:
