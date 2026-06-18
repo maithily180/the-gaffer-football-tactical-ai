@@ -82,6 +82,7 @@ class AnalyticsOverlay:
             ("TXT", _line("Def line",  _fmt(a.def_line_m),          _fmt(b.def_line_m))),
             ("TXT", _line("Control%",  f"{snap.voronoi['teamA_pct']:.0f}",
                                        f"{snap.voronoi['teamB_pct']:.0f}")),
+            ("TXT", _line("Atk3rd%",   *_attacking_third_pct(snap))),
             ("SEP", ""),
             ("TXT", _line("Possess%",  f"{poss.pct_a:.0f}",         f"{poss.pct_b:.0f}")),
         ]
@@ -212,6 +213,21 @@ class AnalyticsOverlay:
             y = y_base + pad + (i + 1) * line_h - 4
             cv2.putText(frame, t_str, (10 + pad, y),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.44, colour, 1, cv2.LINE_AA)
+
+
+def _attacking_third_pct(snap: AnalyticsSnapshot) -> tuple[str, str]:
+    """Each team's % control of their OWN attacking third, '--' if unknown."""
+    sc = snap.space_control
+    if sc is None or not sc.by_third:
+        return "--", "--"
+    n_thirds = 3   # matches space_control.py / overload.py default grid
+    a_third = (n_thirds - 1) if snap.team_a.attack_dir == +1 else 0
+    b_third = (n_thirds - 1) if snap.team_b.attack_dir == +1 else 0
+    a_pair = sc.by_third.get(a_third) if snap.team_a.attack_dir != 0 else None
+    b_pair = sc.by_third.get(b_third) if snap.team_b.attack_dir != 0 else None
+    a_str = f"{a_pair[0]:.0f}" if a_pair else "--"
+    b_str = f"{b_pair[1]:.0f}" if b_pair else "--"
+    return a_str, b_str
 
 
 def _fmt(v: float | None) -> str:

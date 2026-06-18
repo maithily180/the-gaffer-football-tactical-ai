@@ -31,6 +31,7 @@ from gaffer.analytics.overload import compute_overloads, significant_overloads, 
 from gaffer.events.base import (
     COMPACT_BLOCK,
     COUNTER_ATTACK,
+    DOMINANCE,
     HIGH_PRESS,
     HIGH_PRESS_ENDED,
     LINE_BREAK,
@@ -60,6 +61,9 @@ _COMPACT_MIN_FRAMES    = 3           # must be compact this long before we emit 
 _PROG_PASS_MIN_M       = 12.0        # ball advances this far toward goal in one detect frame
 _OVERLOAD_THRESHOLD    = 2           # min player-count advantage in a zone to flag
 _OVERLOAD_MIN_FRAMES   = 2           # sustained detection frames before firing (debounce)
+_DOMINANCE_THRESHOLD   = 65.0        # % control of attacking third to count as dominant
+_DOMINANCE_MIN_SECONDS = 10.0        # sustained duration before firing
+_N_THIRDS              = 3           # matches overload.py / space_control.py default grid
 
 
 class EventDetector:
@@ -106,6 +110,10 @@ class EventDetector:
         self._overload_streak:    dict[tuple[int, int], int] = {}  # consecutive frames same team has advantage
         self._overload_last_team: dict[tuple[int, int], str] = {}  # team with advantage last frame
 
+        # Dominance: per-team sustained attacking-third control
+        self._dominance_start:  dict[str, float] = {}   # team -> time_s the streak began
+        self._dominance_active: dict[str, bool]  = {}   # team -> already fired for this streak
+
         # Counter-attack: track recent ball positions for forward-movement check
         self._ball_hist: deque[tuple[float, float, float]] = deque(maxlen=128)
         # (time_s, x, y) — kept for COUNTER_WINDOW_S window
@@ -129,6 +137,7 @@ class EventDetector:
         events += self._check_compact_block(snap, time_s)
         events += self._check_progressive_pass(snap, time_s)
         events += self._check_overload(snap, time_s)
+        events += self._check_dominance(snap, time_s)
 
         # Update ball history AFTER checks (so we compare prev→curr)
         if snap.ball_xy is not None:
@@ -446,6 +455,14 @@ class EventDetector:
         zones = compute_overloads(team_a_pos, team_b_pos)
         sig   = significant_overloads(zones, threshold=_OVERLOAD_THRESHOLD)
 
+        # Lookup table: zone -> exact Voronoi-clipped control %, when available.
+        # Distinguishes "5 attackers crammed in a corner" from "5 attackers
+        # controlling 40% of the space" — see space_control.py module doc.
+        zone_control = {
+            (z.third_idx, z.lane_idx): z
+            for z in (snap.space_control.zones if snap.space_control else [])
+        }
+
         events: list[FootballEvent] = []
         seen_keys: set[tuple[int, int]] = set()
 
@@ -475,12 +492,17 @@ class EventDetector:
                 self._overload_active[key] = adv_team
                 count_for     = z.teamA_count if adv_team == "teamA" else z.teamB_count
                 count_against = z.teamB_count if adv_team == "teamA" else z.teamA_count
+                data = {"lane": z.lane_name, "third": tlabel,
+                        "count_for": count_for, "count_against": count_against}
+                zc = zone_control.get(key)
+                if zc is not None:
+                    data["space_control_pct"] = (zc.teamA_pct if adv_team == "teamA"
+                                                  else zc.teamB_pct)
                 events.append(FootballEvent(
                     frame_idx=snap.frame_idx, time_s=time_s,
                     event_type=OVERLOAD,
                     team=adv_team, location_m=zone_centre_m(z.third_idx, z.lane_idx),
-                    data={"lane": z.lane_name, "third": tlabel,
-                          "count_for": count_for, "count_against": count_against},
+                    data=data,
                 ))
 
         # Clear state for zones that are no longer significant
@@ -489,5 +511,55 @@ class EventDetector:
                 self._overload_streak.pop(key, None)
                 self._overload_active.pop(key, None)
                 self._overload_last_team.pop(key, None)
+
+        return events
+
+    # ── Dominance ─────────────────────────────────────────────────────────────
+
+    def _check_dominance(
+        self, snap: "AnalyticsSnapshot", time_s: float
+    ) -> list[FootballEvent]:
+        """
+        Fires once a team holds >= DOMINANCE_THRESHOLD% control of their own
+        attacking third for >= DOMINANCE_MIN_SECONDS continuously.  Tracks
+        wall-clock time_s rather than frame counts, so it's correct regardless
+        of detection-frame stride.
+        """
+        events: list[FootballEvent] = []
+        if snap.space_control is None:
+            return events
+        by_third = snap.space_control.by_third
+
+        for team in ("teamA", "teamB"):
+            attack_dir = snap.team_a.attack_dir if team == "teamA" else snap.team_b.attack_dir
+            if attack_dir == 0:
+                self._dominance_start.pop(team, None)
+                self._dominance_active[team] = False
+                continue
+
+            att_third = (_N_THIRDS - 1) if attack_dir == +1 else 0
+            if att_third not in by_third:
+                self._dominance_start.pop(team, None)
+                self._dominance_active[team] = False
+                continue
+
+            pct = by_third[att_third][0 if team == "teamA" else 1]
+
+            if pct >= _DOMINANCE_THRESHOLD:
+                if team not in self._dominance_start:
+                    self._dominance_start[team] = time_s
+                elapsed = time_s - self._dominance_start[team]
+                if (elapsed >= _DOMINANCE_MIN_SECONDS
+                        and not self._dominance_active.get(team, False)):
+                    self._dominance_active[team] = True
+                    events.append(FootballEvent(
+                        frame_idx=snap.frame_idx, time_s=time_s,
+                        event_type=DOMINANCE, team=team,
+                        data={"control_pct": pct, "third": "attacking",
+                              "duration_s": round(elapsed, 1)},
+                    ))
+            else:
+                self._dominance_start.pop(team, None)
+                self._dominance_active[team] = False
 
         return events

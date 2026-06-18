@@ -40,6 +40,7 @@ from gaffer.analytics.compactness import Compactness, team_compactness
 from gaffer.analytics.defensive_line import compute_defensive_line
 from gaffer.analytics.possession import PossessionState, PossessionTracker
 from gaffer.analytics.pressing import compute_pressing_intensity
+from gaffer.analytics.space_control import SpaceControl, compute_space_control
 from gaffer.analytics.voronoi import compute_voronoi_control
 from gaffer.calibration.homography_manager import HomographyManager
 from gaffer.calibration.pitch_visibility import PitchVisibility, PitchVisibilityEstimator
@@ -77,6 +78,7 @@ class AnalyticsSnapshot:
     player_positions_m: dict = field(default_factory=dict)       # track_id -> (x, y)
     player_teams:       dict = field(default_factory=dict)       # track_id -> "teamA"|"teamB"
     player_is_gk:       dict = field(default_factory=dict)       # track_id -> bool
+    space_control:      SpaceControl | None = None                # refined per-zone Voronoi control
     visibility:         PitchVisibility | None = None
     ball_region:        str | None = None
     events:             List[FootballEvent] = field(default_factory=list)
@@ -130,6 +132,7 @@ class PitchAnalyticsEngine:
         poss = self._possession.update(ball_xy, team_a_pos, team_b_pos)
 
         voronoi = compute_voronoi_control(team_a_pos, team_b_pos)
+        space_control = compute_space_control(voronoi.get("cells", []))
 
         pressing = None
         if ball_xy is not None and poss.owner is not None:
@@ -160,6 +163,7 @@ class PitchAnalyticsEngine:
             player_positions_m = player_pos_m,
             player_teams       = player_teams,
             player_is_gk       = player_is_gk,
+            space_control      = space_control,
             visibility         = visibility,
             ball_region        = ball_region,
         )

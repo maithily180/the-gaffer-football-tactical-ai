@@ -50,7 +50,7 @@ def compute_voronoi_control(
         clipped = _clip_polygon_to_pitch(vertices, pitch_w, pitch_h)
         if clipped is None or len(clipped) < 3:
             continue
-        area = _polygon_area(clipped)
+        area = polygon_area(clipped)
         team = "teamA" if i < n_a else "teamB"
         if team == "teamA":
             team_a_area += area
@@ -84,14 +84,24 @@ def _boundary_mirror_points(pitch_w: float, pitch_h: float) -> np.ndarray:
 
 def _clip_polygon_to_pitch(vertices: np.ndarray, pw: float, ph: float) -> np.ndarray | None:
     """Clip polygon vertices to [0,pw] x [0,ph] bounding box (Sutherland-Hodgman)."""
+    return clip_polygon_to_rect(vertices, 0.0, pw, 0.0, ph)
+
+
+def clip_polygon_to_rect(
+    vertices: np.ndarray, x0: float, x1: float, y0: float, y1: float
+) -> np.ndarray | None:
+    """
+    Clip polygon vertices to an arbitrary [x0,x1] x [y0,y1] rectangle
+    (Sutherland-Hodgman).  Shared by the pitch-boundary clip above and by
+    space_control.py's per-zone clipping of Voronoi cells.
+    """
     poly = vertices.tolist()
-    for boundary in [
-        ("left",   lambda p: p[0] >= 0,  lambda a, b: _intersect_x(a, b, 0.0)),
-        ("right",  lambda p: p[0] <= pw, lambda a, b: _intersect_x(a, b, pw)),
-        ("bottom", lambda p: p[1] >= 0,  lambda a, b: _intersect_y(a, b, 0.0)),
-        ("top",    lambda p: p[1] <= ph, lambda a, b: _intersect_y(a, b, ph)),
+    for inside, intersect in [
+        (lambda p: p[0] >= x0, lambda a, b: _intersect_x(a, b, x0)),
+        (lambda p: p[0] <= x1, lambda a, b: _intersect_x(a, b, x1)),
+        (lambda p: p[1] >= y0, lambda a, b: _intersect_y(a, b, y0)),
+        (lambda p: p[1] <= y1, lambda a, b: _intersect_y(a, b, y1)),
     ]:
-        _, inside, intersect = boundary
         output = []
         if not poly:
             return None
@@ -121,7 +131,7 @@ def _intersect_y(a, b, y):
     return [a[0] + t * (b[0] - a[0]), y]
 
 
-def _polygon_area(vertices: np.ndarray) -> float:
+def polygon_area(vertices: np.ndarray) -> float:
     """Shoelace formula for polygon area."""
     v = np.asarray(vertices)
     n = len(v)

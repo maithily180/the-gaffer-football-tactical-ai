@@ -23,6 +23,7 @@ SPRINT_END          = "sprint_end"
 COMPACT_BLOCK       = "compact_block"          # team enters low-block shape
 PROGRESSIVE_PASS    = "progressive_pass"       # ball advances >15m toward goal
 OVERLOAD            = "overload"                # numerical superiority in a pitch zone
+DOMINANCE           = "dominance"                # sustained territorial control of attacking third
 
 
 _LABELS: dict[str, str] = {
@@ -37,10 +38,12 @@ _LABELS: dict[str, str] = {
     COMPACT_BLOCK:       "BLOCK",
     PROGRESSIVE_PASS:    "PROG PASS",
     OVERLOAD:            "OVERLOAD",
+    DOMINANCE:           "DOMINANCE",
 }
 
 _HIGHLIGHT: set[str] = {
-    COUNTER_ATTACK, HIGH_PRESS, LINE_BREAK, POSSESSION_RECOVERY, PROGRESSIVE_PASS, OVERLOAD
+    COUNTER_ATTACK, HIGH_PRESS, LINE_BREAK, POSSESSION_RECOVERY, PROGRESSIVE_PASS,
+    OVERLOAD, DOMINANCE,
 }
 
 
@@ -60,7 +63,13 @@ class FootballEvent:
             lane = self.data.get("lane", "").replace("_", " ")
             cf   = self.data.get("count_for")
             ca   = self.data.get("count_against")
-            return f"{base}{tlbl} {lane} {cf}v{ca}"
+            sc   = self.data.get("space_control_pct")
+            suffix = f" sc={sc:.0f}%" if sc is not None else ""
+            return f"{base}{tlbl} {lane} {cf}v{ca}{suffix}"
+        if self.event_type == DOMINANCE and self.data:
+            pct = self.data.get("control_pct")
+            dur = self.data.get("duration_s")
+            return f"{base}{tlbl} {pct:.0f}% ({dur:.0f}s)"
         return f"{base}{tlbl}"
 
     @property
