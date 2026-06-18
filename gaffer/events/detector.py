@@ -27,12 +27,14 @@ from collections import deque
 from typing import TYPE_CHECKING
 
 from gaffer import config
+from gaffer.analytics.overload import compute_overloads, significant_overloads, third_label, zone_centre_m
 from gaffer.events.base import (
     COMPACT_BLOCK,
     COUNTER_ATTACK,
     HIGH_PRESS,
     HIGH_PRESS_ENDED,
     LINE_BREAK,
+    OVERLOAD,
     POSSESSION_CHANGE,
     POSSESSION_RECOVERY,
     PROGRESSIVE_PASS,
@@ -56,6 +58,8 @@ _COMPACT_WIDTH_M       = 35.0        # metres
 _COMPACT_AREA_M2       = 950.0       # m² — low block threshold
 _COMPACT_MIN_FRAMES    = 3           # must be compact this long before we emit the event
 _PROG_PASS_MIN_M       = 12.0        # ball advances this far toward goal in one detect frame
+_OVERLOAD_THRESHOLD    = 2           # min player-count advantage in a zone to flag
+_OVERLOAD_MIN_FRAMES   = 2           # sustained detection frames before firing (debounce)
 
 
 class EventDetector:
@@ -97,6 +101,11 @@ class EventDetector:
         self._prev_ball_xy: tuple[float, float] | None = None
         self._prev_ball_attack_dir: int = 0   # +1 or -1 from last snap
 
+        # Overload: per-zone (third_idx, lane_idx) state
+        self._overload_active:    dict[tuple[int, int], str] = {}  # team we've already fired for
+        self._overload_streak:    dict[tuple[int, int], int] = {}  # consecutive frames same team has advantage
+        self._overload_last_team: dict[tuple[int, int], str] = {}  # team with advantage last frame
+
         # Counter-attack: track recent ball positions for forward-movement check
         self._ball_hist: deque[tuple[float, float, float]] = deque(maxlen=128)
         # (time_s, x, y) — kept for COUNTER_WINDOW_S window
@@ -119,6 +128,7 @@ class EventDetector:
         events += self._check_sprint(snap, time_s)
         events += self._check_compact_block(snap, time_s)
         events += self._check_progressive_pass(snap, time_s)
+        events += self._check_overload(snap, time_s)
 
         # Update ball history AFTER checks (so we compare prev→curr)
         if snap.ball_xy is not None:
@@ -417,3 +427,67 @@ class EventDetector:
                 data={"fwd_m": round(fwd, 1)},
             )]
         return []
+
+    # ── Overload ──────────────────────────────────────────────────────────────
+
+    def _check_overload(
+        self, snap: "AnalyticsSnapshot", time_s: float
+    ) -> list[FootballEvent]:
+        """
+        Numerical superiority in a pitch zone, sustained for OVERLOAD_MIN_FRAMES.
+        Only fires for the team's middle/attacking third — a defensive-third
+        overload is just normal defensive numbers, not a tactical event.
+        """
+        team_a_pos = snap.positions.get("teamA", [])
+        team_b_pos = snap.positions.get("teamB", [])
+        if not team_a_pos and not team_b_pos:
+            return []
+
+        zones = compute_overloads(team_a_pos, team_b_pos)
+        sig   = significant_overloads(zones, threshold=_OVERLOAD_THRESHOLD)
+
+        events: list[FootballEvent] = []
+        seen_keys: set[tuple[int, int]] = set()
+
+        for z in sig:
+            key = (z.third_idx, z.lane_idx)
+            adv_team   = "teamA" if z.diff > 0 else "teamB"
+            attack_dir = (snap.team_a.attack_dir if adv_team == "teamA"
+                          else snap.team_b.attack_dir)
+            tlabel = third_label(z.third_idx, attack_dir)
+
+            if tlabel == "defensive" or tlabel == "unknown":
+                self._overload_streak.pop(key, None)
+                self._overload_active.pop(key, None)
+                self._overload_last_team.pop(key, None)
+                continue
+
+            seen_keys.add(key)
+            if self._overload_last_team.get(key) == adv_team:
+                self._overload_streak[key] = self._overload_streak.get(key, 0) + 1
+            else:
+                self._overload_streak[key] = 1
+                self._overload_active.pop(key, None)   # advantage flipped teams — reset
+            self._overload_last_team[key] = adv_team
+
+            if (self._overload_streak[key] == _OVERLOAD_MIN_FRAMES
+                    and self._overload_active.get(key) != adv_team):
+                self._overload_active[key] = adv_team
+                count_for     = z.teamA_count if adv_team == "teamA" else z.teamB_count
+                count_against = z.teamB_count if adv_team == "teamA" else z.teamA_count
+                events.append(FootballEvent(
+                    frame_idx=snap.frame_idx, time_s=time_s,
+                    event_type=OVERLOAD,
+                    team=adv_team, location_m=zone_centre_m(z.third_idx, z.lane_idx),
+                    data={"lane": z.lane_name, "third": tlabel,
+                          "count_for": count_for, "count_against": count_against},
+                ))
+
+        # Clear state for zones that are no longer significant
+        for key in list(self._overload_last_team.keys()):
+            if key not in seen_keys:
+                self._overload_streak.pop(key, None)
+                self._overload_active.pop(key, None)
+                self._overload_last_team.pop(key, None)
+
+        return events

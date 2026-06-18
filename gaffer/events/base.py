@@ -22,6 +22,7 @@ SPRINT_START        = "sprint_start"
 SPRINT_END          = "sprint_end"
 COMPACT_BLOCK       = "compact_block"          # team enters low-block shape
 PROGRESSIVE_PASS    = "progressive_pass"       # ball advances >15m toward goal
+OVERLOAD            = "overload"                # numerical superiority in a pitch zone
 
 
 _LABELS: dict[str, str] = {
@@ -35,10 +36,11 @@ _LABELS: dict[str, str] = {
     SPRINT_END:          "sprint end",
     COMPACT_BLOCK:       "BLOCK",
     PROGRESSIVE_PASS:    "PROG PASS",
+    OVERLOAD:            "OVERLOAD",
 }
 
 _HIGHLIGHT: set[str] = {
-    COUNTER_ATTACK, HIGH_PRESS, LINE_BREAK, POSSESSION_RECOVERY, PROGRESSIVE_PASS
+    COUNTER_ATTACK, HIGH_PRESS, LINE_BREAK, POSSESSION_RECOVERY, PROGRESSIVE_PASS, OVERLOAD
 }
 
 
@@ -54,6 +56,11 @@ class FootballEvent:
     def label(self) -> str:
         base  = _LABELS.get(self.event_type, self.event_type)
         tlbl  = {"teamA": " A", "teamB": " B"}.get(self.team or "", "")
+        if self.event_type == OVERLOAD and self.data:
+            lane = self.data.get("lane", "").replace("_", " ")
+            cf   = self.data.get("count_for")
+            ca   = self.data.get("count_against")
+            return f"{base}{tlbl} {lane} {cf}v{ca}"
         return f"{base}{tlbl}"
 
     @property
