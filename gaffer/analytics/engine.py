@@ -38,6 +38,7 @@ from typing import List
 from gaffer import config
 from gaffer.analytics.compactness import Compactness, team_compactness
 from gaffer.analytics.defensive_line import compute_defensive_line
+from gaffer.analytics.passing import PassDetector, PassEvent
 from gaffer.analytics.possession import PossessionState, PossessionTracker
 from gaffer.analytics.pressing import compute_pressing_intensity
 from gaffer.analytics.space_control import SpaceControl, compute_space_control
@@ -79,6 +80,7 @@ class AnalyticsSnapshot:
     player_teams:       dict = field(default_factory=dict)       # track_id -> "teamA"|"teamB"
     player_is_gk:       dict = field(default_factory=dict)       # track_id -> bool
     space_control:      SpaceControl | None = None                # refined per-zone Voronoi control
+    pass_event:         PassEvent | None = None                    # fires on the frame a pass completes
     visibility:         PitchVisibility | None = None
     ball_region:        str | None = None
     events:             List[FootballEvent] = field(default_factory=list)
@@ -101,6 +103,7 @@ class PitchAnalyticsEngine:
         self._fps = fps
         self._press_r = pressing_radius_m
         self._possession = PossessionTracker()
+        self._pass_detector = PassDetector()
         self._event_detector = EventDetector(fps=fps)
         self._last: AnalyticsSnapshot | None = None
         self._vis_est = (
@@ -167,9 +170,16 @@ class PitchAnalyticsEngine:
             visibility         = visibility,
             ball_region        = ball_region,
         )
+        snap.pass_event = self._pass_detector.update(snap, frame_idx / self._fps)
         snap.events = self._event_detector.update(snap)
         self._last = snap
         return snap
+
+    def pass_network(self) -> dict[tuple[int, int], int]:
+        return self._pass_detector.pass_network()
+
+    def current_pass_sequence(self) -> list[int]:
+        return self._pass_detector.current_sequence()
 
     @property
     def last(self) -> AnalyticsSnapshot | None:

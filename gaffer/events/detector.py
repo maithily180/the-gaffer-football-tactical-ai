@@ -15,7 +15,11 @@ Detected events
   line_break           ball x-coord crosses the defending team's backline
   sprint_start/end     per-player speed crosses SPRINT_THRESHOLD_MS
   compact_block        defending team enters width < COMPACT_WIDTH_M + area < COMPACT_AREA_M2
-  progressive_pass     ball advances ≥ PROG_PASS_MIN_M toward goal between consecutive frames
+  pass                 confirmed sender->receiver pass completes (from passing.PassDetector)
+  progressive_pass     a pass advances >= PROGRESSIVE_MIN_M toward goal (real geometry, not
+                        frame-to-frame ball drift)
+  overload             numerical superiority in a pitch zone (see overload.py)
+  dominance            sustained >=65% control of a team's own attacking third for >=10s
 
 All measurements are in pitch metres; times in seconds at the supplied fps.
 """
@@ -36,6 +40,7 @@ from gaffer.events.base import (
     HIGH_PRESS_ENDED,
     LINE_BREAK,
     OVERLOAD,
+    PASS,
     POSSESSION_CHANGE,
     POSSESSION_RECOVERY,
     PROGRESSIVE_PASS,
@@ -58,7 +63,6 @@ _SPRINT_MIN_FRAMES     = config.SPRINT_MIN_FRAMES     # 3 consecutive frames
 _COMPACT_WIDTH_M       = 35.0        # metres
 _COMPACT_AREA_M2       = 950.0       # m² — low block threshold
 _COMPACT_MIN_FRAMES    = 3           # must be compact this long before we emit the event
-_PROG_PASS_MIN_M       = 12.0        # ball advances this far toward goal in one detect frame
 _OVERLOAD_THRESHOLD    = 2           # min player-count advantage in a zone to flag
 _OVERLOAD_MIN_FRAMES   = 2           # sustained detection frames before firing (debounce)
 _DOMINANCE_THRESHOLD   = 65.0        # % control of attacking third to count as dominant
@@ -101,10 +105,6 @@ class EventDetector:
         self._compact_streak: dict[str, int] = {"teamA": 0, "teamB": 0}
         self._compact_active: dict[str, bool] = {"teamA": False, "teamB": False}
 
-        # Progressive pass
-        self._prev_ball_xy: tuple[float, float] | None = None
-        self._prev_ball_attack_dir: int = 0   # +1 or -1 from last snap
-
         # Overload: per-zone (third_idx, lane_idx) state
         self._overload_active:    dict[tuple[int, int], str] = {}  # team we've already fired for
         self._overload_streak:    dict[tuple[int, int], int] = {}  # consecutive frames same team has advantage
@@ -135,17 +135,13 @@ class EventDetector:
         events += self._check_line_break(snap, time_s)
         events += self._check_sprint(snap, time_s)
         events += self._check_compact_block(snap, time_s)
-        events += self._check_progressive_pass(snap, time_s)
+        events += self._check_pass(snap, time_s)
         events += self._check_overload(snap, time_s)
         events += self._check_dominance(snap, time_s)
 
         # Update ball history AFTER checks (so we compare prev→curr)
         if snap.ball_xy is not None:
             self._ball_hist.append((time_s, snap.ball_xy[0], snap.ball_xy[1]))
-        self._prev_ball_xy = snap.ball_xy
-        self._prev_ball_attack_dir = (
-            snap.team_a.attack_dir if snap.team_a.attack_dir != 0 else self._prev_ball_attack_dir
-        )
 
         return events
 
@@ -409,33 +405,41 @@ class EventDetector:
 
         return events
 
-    # ── Progressive pass ──────────────────────────────────────────────────────
+    # ── Pass ──────────────────────────────────────────────────────────────────
 
-    def _check_progressive_pass(
+    def _check_pass(
         self, snap: "AnalyticsSnapshot", time_s: float
     ) -> list[FootballEvent]:
         """
-        Ball advances ≥ PROG_PASS_MIN_M toward the possession team's goal
-        in one detection-frame cycle while the same team retains possession.
+        Surfaces snap.pass_event (computed by PassDetector from real
+        sender/receiver geometry) as a PASS event, and as a PROGRESSIVE_PASS
+        when it advances >= the progressive threshold toward goal.  This
+        replaces the old ball-displacement heuristic — that approach counted
+        any forward ball drift between frames (including extrapolation noise
+        and deflections) where this one only fires for a confirmed,
+        sender-to-receiver pass between two specific players.
         """
-        if (snap.ball_xy is None or self._prev_ball_xy is None
-                or snap.possession.owner is None):
+        pe = snap.pass_event
+        if pe is None:
             return []
 
-        attack_dir = (snap.team_a.attack_dir if snap.possession.owner == "teamA"
-                      else snap.team_b.attack_dir)
-        if attack_dir == 0:
-            return []
+        events = [FootballEvent(
+            frame_idx=pe.frame_idx, time_s=pe.time_s,
+            event_type=PASS, team=pe.team, location_m=pe.receiver_pos_m,
+            data={"sender_id": pe.sender_id, "receiver_id": pe.receiver_id,
+                  "distance_m": pe.distance_m, "duration_s": pe.duration_s,
+                  "speed_ms": pe.speed_ms, "direction": pe.direction},
+        )]
 
-        fwd = (snap.ball_xy[0] - self._prev_ball_xy[0]) * attack_dir
-        if fwd >= _PROG_PASS_MIN_M:
-            return [FootballEvent(
-                frame_idx=snap.frame_idx, time_s=time_s,
-                event_type=PROGRESSIVE_PASS,
-                team=snap.possession.owner, location_m=snap.ball_xy,
-                data={"fwd_m": round(fwd, 1)},
-            )]
-        return []
+        if pe.progressive:
+            events.append(FootballEvent(
+                frame_idx=pe.frame_idx, time_s=pe.time_s,
+                event_type=PROGRESSIVE_PASS, team=pe.team, location_m=pe.receiver_pos_m,
+                data={"sender_id": pe.sender_id, "receiver_id": pe.receiver_id,
+                      "distance_m": pe.distance_m},
+            ))
+
+        return events
 
     # ── Overload ──────────────────────────────────────────────────────────────
 
