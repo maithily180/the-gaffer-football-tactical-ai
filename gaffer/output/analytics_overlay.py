@@ -20,6 +20,7 @@ import numpy as np
 
 from gaffer import config
 from gaffer.analytics.engine import AnalyticsSnapshot
+from gaffer.analytics.episodes import Episode
 from gaffer.calibration.pitch_model import PitchModel
 from gaffer.events.base import FootballEvent
 
@@ -32,6 +33,7 @@ _YELLOW = (0, 220, 220)               # highlight events
 
 _MAX_TICKER = 6       # max events shown in the ticker
 _TICKER_TTL = 120    # frames an event stays in the ticker (~5s @ 25fps)
+_EPISODE_TTL = 175    # frames a closed-episode banner stays up (~7s @ 25fps) — rarer, bigger than a single event
 
 
 class AnalyticsOverlay:
@@ -40,6 +42,7 @@ class AnalyticsOverlay:
         self._base_pitch = self.pm.draw_pitch()
         # (event, expire_frame) — newest first
         self._ticker: deque[tuple[FootballEvent, int]] = deque(maxlen=_MAX_TICKER)
+        self._episode_banner: deque[tuple[Episode, int]] = deque(maxlen=2)
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -60,6 +63,8 @@ class AnalyticsOverlay:
         self._draw_voronoi_inset(out, snap, voronoi_width)
         self._update_ticker(snap)
         self._draw_ticker(out, snap.frame_idx)
+        self._update_episode_banner(snap)
+        self._draw_episode_banner(out, snap.frame_idx)
         return out
 
     # ── Stats panel ───────────────────────────────────────────────────────────
@@ -224,6 +229,34 @@ class AnalyticsOverlay:
             y = y_base + pad + (i + 1) * line_h - 4
             cv2.putText(frame, t_str, (10 + pad, y),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.44, colour, 1, cv2.LINE_AA)
+
+    # ── Tactical episode banner ───────────────────────────────────────────────
+
+    def _update_episode_banner(self, snap: AnalyticsSnapshot) -> None:
+        for ep in snap.closed_episodes:
+            self._episode_banner.appendleft((ep, snap.frame_idx + _EPISODE_TTL))
+
+    def _draw_episode_banner(self, frame: np.ndarray, current_frame: int) -> None:
+        """Centered banner for the most recently closed tactical episode —
+        rarer and more significant than a single event, so it gets its own
+        spot (top-center) instead of competing with the per-event ticker."""
+        active = [(ep, exp) for ep, exp in self._episode_banner if exp > current_frame]
+        if not active:
+            return
+        ep, exp = active[0]
+        fade = min(1.0, (exp - current_frame) / 50)
+        tlabel = "TEAM A" if ep.team == "teamA" else "TEAM B"
+        text = f"EPISODE #{ep.episode_id}  {tlabel}  {ep.narrative()}  -> {ep.outcome}"
+
+        H, W = frame.shape[:2]
+        (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.55, 1)
+        x, y = (W - tw) // 2, 40
+
+        overlay = frame.copy()
+        cv2.rectangle(overlay, (x - 12, y - th - 10), (x + tw + 12, y + 8), (0, 0, 0), -1)
+        cv2.addWeighted(overlay, 0.6, frame, 0.4, 0, frame)
+        clr = (int(230 * fade), int(120 * fade), int(230 * fade))   # magenta — distinct from yellow event highlights
+        cv2.putText(frame, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.55, clr, 2, cv2.LINE_AA)
 
 
 def _attacking_third_pct(snap: AnalyticsSnapshot) -> tuple[str, str]:

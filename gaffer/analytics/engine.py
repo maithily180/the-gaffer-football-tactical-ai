@@ -38,6 +38,7 @@ from typing import List
 from gaffer import config
 from gaffer.analytics.compactness import Compactness, team_compactness
 from gaffer.analytics.defensive_line import compute_defensive_line
+from gaffer.analytics.episodes import Episode, EpisodeDetector
 from gaffer.analytics.formation import FormationAnalyzer, TeamFormation
 from gaffer.analytics.pass_network_analytics import PassNetworkReport
 from gaffer.analytics.pass_network_analytics import analyze as analyze_pass_network
@@ -91,6 +92,7 @@ class AnalyticsSnapshot:
     formation_a:        TeamFormation | None = None
     formation_b:        TeamFormation | None = None
     roles:              dict = field(default_factory=dict)        # track_id -> PlayerRole, both teams
+    closed_episodes:    List[Episode] = field(default_factory=list)  # tactical episode(s) that ended this frame
 
 
 class PitchAnalyticsEngine:
@@ -114,6 +116,7 @@ class PitchAnalyticsEngine:
         self._event_detector = EventDetector(fps=fps)
         self._formation = FormationAnalyzer(fps=fps)
         self._role_tracker = RoleTracker()
+        self._episodes = EpisodeDetector(fps=fps)
         self._last: AnalyticsSnapshot | None = None
         self._vis_est = (
             PitchVisibilityEstimator(image_size[0], image_size[1])
@@ -191,6 +194,7 @@ class PitchAnalyticsEngine:
         if snap.formation_b is not None:
             raw_roles.update(assign_roles(snap.formation_b, dir_b))
         snap.roles = self._role_tracker.update(raw_roles)
+        snap.closed_episodes = self._episodes.update(snap, snap.events)
 
         self._last = snap
         return snap
@@ -222,6 +226,12 @@ class PitchAnalyticsEngine:
 
     def current_pass_sequence(self) -> list[int]:
         return self._pass_detector.current_sequence()
+
+    def episodes_so_far(self) -> list[Episode]:
+        """All tactical episodes closed so far, chronological. The current
+        in-progress possession (if any) is not included since it hasn't
+        ended yet — there's no outcome to report."""
+        return list(self._episodes.episodes)
 
     @property
     def last(self) -> AnalyticsSnapshot | None:

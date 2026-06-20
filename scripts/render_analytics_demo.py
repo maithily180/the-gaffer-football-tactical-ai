@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import sys
 import time
+from collections import Counter
 from pathlib import Path
 
 import numpy as np
@@ -218,6 +219,18 @@ def main() -> None:
         print(f"    Hub players        : {hubs}")
     if report.longest_buildup:
         print(f"    Longest build-up   : {' -> '.join(report.longest_buildup)}")
+
+    episodes = engine.episodes_so_far()
+    print()
+    print(f"  Tactical episodes  : {len(episodes)} completed")
+    if episodes:
+        outcome_counts = Counter(ep.outcome for ep in episodes)
+        print("    Outcomes           : " +
+              ", ".join(f"{k} x{v}" for k, v in outcome_counts.most_common()))
+        notable = sorted(episodes, key=lambda ep: len(ep.events), reverse=True)[:3]
+        for ep in notable:
+            print(f"    #{ep.episode_id} {ep.team}: {ep.narrative()}  "
+                  f"({ep.duration_s}s, outcome: {ep.outcome})")
 
     print()
     print(f"  Output : {out_path}  ({size_mb:.1f} MB)")
