@@ -83,6 +83,8 @@ class AnalyticsOverlay:
             ("TXT", _line("Control%",  f"{snap.voronoi['teamA_pct']:.0f}",
                                        f"{snap.voronoi['teamB_pct']:.0f}")),
             ("TXT", _line("Atk3rd%",   *_attacking_third_pct(snap))),
+            ("TXT", _line("Formation", _fmt_formation(snap.formation_a),
+                                       _fmt_formation(snap.formation_b))),
             ("SEP", ""),
             ("TXT", _line("Possess%",  f"{poss.pct_a:.0f}",         f"{poss.pct_b:.0f}")),
         ]
@@ -170,6 +172,15 @@ class AnalyticsOverlay:
                 cv2.circle(img, (cx, cy), 6, clr, -1)
                 cv2.circle(img, (cx, cy), 6, (255, 255, 255), 1)
 
+        # Role labels (LB, DM, RW, ...) next to whichever dots have a track_id
+        for tid, (x, y) in snap.player_positions_m.items():
+            role = snap.roles.get(tid)
+            if role is None:
+                continue
+            cx, cy = self.pm.pitch_to_pixels(x, y)
+            cv2.putText(img, role.role, (cx + 7, cy + 4),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.34, (255, 255, 255), 1, cv2.LINE_AA)
+
         if snap.ball_xy is not None:
             bx, by = self.pm.pitch_to_pixels(*snap.ball_xy)
             cv2.circle(img, (bx, by), 5, config.BALL_COLOR_BGR, -1)
@@ -232,6 +243,10 @@ def _attacking_third_pct(snap: AnalyticsSnapshot) -> tuple[str, str]:
 
 def _fmt(v: float | None) -> str:
     return "--" if v is None else f"{v:.0f}"
+
+
+def _fmt_formation(fm) -> str:
+    return fm.formation_str if fm is not None else "--"
 
 
 def _regions_short(regions: list[str]) -> str:

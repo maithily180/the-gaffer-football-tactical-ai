@@ -38,9 +38,11 @@ from typing import List
 from gaffer import config
 from gaffer.analytics.compactness import Compactness, team_compactness
 from gaffer.analytics.defensive_line import compute_defensive_line
+from gaffer.analytics.formation import FormationAnalyzer, TeamFormation
 from gaffer.analytics.passing import PassDetector, PassEvent
 from gaffer.analytics.possession import PossessionState, PossessionTracker
 from gaffer.analytics.pressing import compute_pressing_intensity
+from gaffer.analytics.roles import PlayerRole, RoleTracker, assign_roles, label_pass_network
 from gaffer.analytics.space_control import SpaceControl, compute_space_control
 from gaffer.analytics.voronoi import compute_voronoi_control
 from gaffer.calibration.homography_manager import HomographyManager
@@ -84,6 +86,9 @@ class AnalyticsSnapshot:
     visibility:         PitchVisibility | None = None
     ball_region:        str | None = None
     events:             List[FootballEvent] = field(default_factory=list)
+    formation_a:        TeamFormation | None = None
+    formation_b:        TeamFormation | None = None
+    roles:              dict = field(default_factory=dict)        # track_id -> PlayerRole, both teams
 
 
 class PitchAnalyticsEngine:
@@ -105,6 +110,8 @@ class PitchAnalyticsEngine:
         self._possession = PossessionTracker()
         self._pass_detector = PassDetector()
         self._event_detector = EventDetector(fps=fps)
+        self._formation = FormationAnalyzer(fps=fps)
+        self._role_tracker = RoleTracker()
         self._last: AnalyticsSnapshot | None = None
         self._vis_est = (
             PitchVisibilityEstimator(image_size[0], image_size[1])
@@ -172,11 +179,29 @@ class PitchAnalyticsEngine:
         )
         snap.pass_event = self._pass_detector.update(snap, frame_idx / self._fps)
         snap.events = self._event_detector.update(snap)
+
+        self._formation.update(snap)
+        snap.formation_a = self._formation.formation("teamA", dir_a)
+        snap.formation_b = self._formation.formation("teamB", dir_b)
+        raw_roles: dict[int, PlayerRole] = {}
+        if snap.formation_a is not None:
+            raw_roles.update(assign_roles(snap.formation_a, dir_a))
+        if snap.formation_b is not None:
+            raw_roles.update(assign_roles(snap.formation_b, dir_b))
+        snap.roles = self._role_tracker.update(raw_roles)
+
         self._last = snap
         return snap
 
     def pass_network(self) -> dict[tuple[int, int], int]:
         return self._pass_detector.pass_network()
+
+    def labeled_pass_network(self) -> dict[tuple[str, str], int]:
+        """Pass network re-keyed by role label ("LB" -> "DM") instead of
+        track_id, using each sender/receiver's best-known role over its
+        whole lifetime (not just whether it's still on screen at the end)."""
+        return label_pass_network(self._pass_detector.pass_network(),
+                                  self._role_tracker.all_known())
 
     def current_pass_sequence(self) -> list[int]:
         return self._pass_detector.current_sequence()
