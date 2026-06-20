@@ -169,6 +169,13 @@ def label_pass_network(
     return out
 
 
+def label_for(track_id: int, roles: dict[int, PlayerRole]) -> str:
+    """Public single-id version of the honest-fallback rule label_pass_network
+    uses: a curated position name, or "#track_id" if only a frame-local
+    fallback (or nothing) is known."""
+    return _label_or_unknown(track_id, roles)
+
+
 # ── Internal ──────────────────────────────────────────────────────────────────
 
 def _label_or_unknown(track_id: int, roles: dict[int, PlayerRole]) -> str:

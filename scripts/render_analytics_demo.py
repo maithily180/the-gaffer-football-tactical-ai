@@ -201,6 +201,24 @@ def main() -> None:
         print()
         print(f"  H propagation      : {s['updates']} updates, {s['holds']} holds, "
               f"{s['cuts']} scene cuts")
+
+    report = engine.pass_network_report()
+    print()
+    print("  Pass network & player influence")
+    if report.most_frequent is not None:
+        mf = report.most_frequent
+        print(f"    Most frequent conn : {mf.sender} -> {mf.receiver}  ({mf.count}x)")
+    if report.progressive_leaders:
+        leaders = "  ".join(f"{c.sender}->{c.receiver} ({c.count}x)"
+                            for c in report.progressive_leaders)
+        print(f"    Progressive leaders: {leaders}")
+    if report.hub_players:
+        hubs = "  ".join(f"{h.label} ({h.centrality:.2f}, {h.involvement} touches)"
+                         for h in report.hub_players)
+        print(f"    Hub players        : {hubs}")
+    if report.longest_buildup:
+        print(f"    Longest build-up   : {' -> '.join(report.longest_buildup)}")
+
     print()
     print(f"  Output : {out_path}  ({size_mb:.1f} MB)")
     print("=" * 54)

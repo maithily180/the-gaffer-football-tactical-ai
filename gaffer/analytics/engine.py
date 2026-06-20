@@ -39,6 +39,8 @@ from gaffer import config
 from gaffer.analytics.compactness import Compactness, team_compactness
 from gaffer.analytics.defensive_line import compute_defensive_line
 from gaffer.analytics.formation import FormationAnalyzer, TeamFormation
+from gaffer.analytics.pass_network_analytics import PassNetworkReport
+from gaffer.analytics.pass_network_analytics import analyze as analyze_pass_network
 from gaffer.analytics.passing import PassDetector, PassEvent
 from gaffer.analytics.possession import PossessionState, PossessionTracker
 from gaffer.analytics.pressing import compute_pressing_intensity
@@ -202,6 +204,21 @@ class PitchAnalyticsEngine:
         whole lifetime (not just whether it's still on screen at the end)."""
         return label_pass_network(self._pass_detector.pass_network(),
                                   self._role_tracker.all_known())
+
+    def pass_network_report(self, top_n: int = 3) -> PassNetworkReport:
+        """Most frequent connection, top progressive connections, hub players
+        (degree centrality), and the longest build-up chain so far — all in
+        role labels.  Cheap to call repeatedly (no internal state of its
+        own); typically called once at the end of a run."""
+        open_sequence = self._pass_detector.current_sequence()
+        sequences = self._pass_detector.sequences + ([open_sequence] if open_sequence else [])
+        return analyze_pass_network(
+            self._pass_detector.pass_network(),
+            self._pass_detector.passes,
+            sequences,
+            self._role_tracker.all_known(),
+            top_n=top_n,
+        )
 
     def current_pass_sequence(self) -> list[int]:
         return self._pass_detector.current_sequence()
