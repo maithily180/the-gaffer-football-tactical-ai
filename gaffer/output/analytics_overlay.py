@@ -93,6 +93,12 @@ class AnalyticsOverlay:
             ("SEP", ""),
             ("TXT", _line("Possess%",  f"{poss.pct_a:.0f}",         f"{poss.pct_b:.0f}")),
         ]
+        if snap.match_totals is not None:
+            mt = snap.match_totals
+            lines.append(("SEP", ""))
+            lines.append(("TXT", f"Passes {mt['passes']}  Prog {mt['progressive_passes']}  "
+                                  f"LB {mt['line_breaks']}  OVL {mt['overloads']}  "
+                                  f"Dom {mt['dominance_periods']}"))
         if snap.pressing is not None:
             owner_lbl = "A" if poss.owner == "teamA" else "B"
             lines.append(("TXT",

@@ -40,6 +40,7 @@ from gaffer.analytics.compactness import Compactness, team_compactness
 from gaffer.analytics.defensive_line import compute_defensive_line
 from gaffer.analytics.episodes import Episode, EpisodeDetector
 from gaffer.analytics.formation import FormationAnalyzer, TeamFormation
+from gaffer.analytics.match_report import MatchReport, MatchStatsAccumulator
 from gaffer.analytics.pass_network_analytics import PassNetworkReport
 from gaffer.analytics.pass_network_analytics import analyze as analyze_pass_network
 from gaffer.analytics.passing import PassDetector, PassEvent
@@ -51,7 +52,7 @@ from gaffer.analytics.voronoi import compute_voronoi_control
 from gaffer.calibration.homography_manager import HomographyManager
 from gaffer.calibration.pitch_visibility import PitchVisibility, PitchVisibilityEstimator
 from gaffer.detection.detector import Detection
-from gaffer.events.base import FootballEvent
+from gaffer.events.base import DOMINANCE, LINE_BREAK, OVERLOAD, FootballEvent
 from gaffer.events.detector import EventDetector
 
 
@@ -93,6 +94,7 @@ class AnalyticsSnapshot:
     formation_b:        TeamFormation | None = None
     roles:              dict = field(default_factory=dict)        # track_id -> PlayerRole, both teams
     closed_episodes:    List[Episode] = field(default_factory=list)  # tactical episode(s) that ended this frame
+    match_totals:       dict | None = None                         # running counts so far (passes, line breaks, ...)
 
 
 class PitchAnalyticsEngine:
@@ -117,6 +119,7 @@ class PitchAnalyticsEngine:
         self._formation = FormationAnalyzer(fps=fps)
         self._role_tracker = RoleTracker()
         self._episodes = EpisodeDetector(fps=fps)
+        self._match_stats = MatchStatsAccumulator()
         self._last: AnalyticsSnapshot | None = None
         self._vis_est = (
             PitchVisibilityEstimator(image_size[0], image_size[1])
@@ -195,6 +198,15 @@ class PitchAnalyticsEngine:
             raw_roles.update(assign_roles(snap.formation_b, dir_b))
         snap.roles = self._role_tracker.update(raw_roles)
         snap.closed_episodes = self._episodes.update(snap, snap.events)
+        self._match_stats.update(snap)
+        passes_so_far = self._pass_detector.passes
+        snap.match_totals = {
+            "passes":             len(passes_so_far),
+            "progressive_passes": sum(1 for p in passes_so_far if p.progressive),
+            "line_breaks":        self._match_stats.event_count(LINE_BREAK),
+            "overloads":          self._match_stats.event_count(OVERLOAD),
+            "dominance_periods":  self._match_stats.event_count(DOMINANCE),
+        }
 
         self._last = snap
         return snap
@@ -232,6 +244,27 @@ class PitchAnalyticsEngine:
         in-progress possession (if any) is not included since it hasn't
         ended yet — there's no outcome to report."""
         return list(self._episodes.episodes)
+
+    def match_report(self, top_n: int = 3) -> MatchReport:
+        """Fully factual end-of-match summary -- no LLM. Possession and pass
+        totals come straight from their own trackers (already cumulative);
+        space control and event counts come from the running accumulator
+        fed every update(); top episodes reuse the same "most event-dense"
+        ranking the demo script's console summary already uses."""
+        poss = self.possession_summary()
+        passes = self._pass_detector.passes
+        episodes = self.episodes_so_far()
+        top = sorted(episodes, key=lambda ep: len(ep.events), reverse=True)[:top_n]
+        return MatchReport(
+            possession_pct      = (poss["teamA_pct"], poss["teamB_pct"]),
+            space_control_pct   = self._match_stats.space_control_pct(),
+            total_passes        = len(passes),
+            progressive_passes  = sum(1 for p in passes if p.progressive),
+            line_breaks         = self._match_stats.event_count(LINE_BREAK),
+            overloads           = self._match_stats.event_count(OVERLOAD),
+            dominance_periods   = self._match_stats.event_count(DOMINANCE),
+            top_episodes        = top,
+        )
 
     @property
     def last(self) -> AnalyticsSnapshot | None:

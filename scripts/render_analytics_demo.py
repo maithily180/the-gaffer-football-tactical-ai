@@ -233,6 +233,9 @@ def main() -> None:
                   f"({ep.duration_s}s, outcome: {ep.outcome})")
 
     print()
+    print(engine.match_report().render())
+
+    print()
     print(f"  Output : {out_path}  ({size_mb:.1f} MB)")
     print("=" * 54)
 
