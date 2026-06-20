@@ -32,6 +32,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import math
 import sys
 import time
 from collections import deque
@@ -54,6 +55,7 @@ from gaffer.tracking.ball_state_estimator import BallStateEstimator
 from gaffer.tracking.ball_tracker import BallTracker
 from gaffer.tracking.tracker import PlayerTracker
 from gaffer.tracking.world_model import BallWorldModel, _pitch_to_image
+from gaffer.tracking.world_model_v2 import WorldModelV2
 from gaffer.video.loader import VideoLoader
 from gaffer.video.writer import VideoWriter
 
@@ -65,6 +67,7 @@ HUD_CLR       = (0, 220, 60)      # green
 ANCHOR_CLR    = (255, 220, 0)     # cyan
 EXPECT_CLR    = (255, 255, 255)   # white
 EVENT_CLR     = (0, 220, 220)     # yellow-ish for event badge
+CORRIDOR_CLR  = (255, 0, 200)     # magenta — predicted pass corridor (v1.5 WorldModelV2)
 
 
 @dataclass
@@ -114,6 +117,24 @@ def _draw_trail(frame: np.ndarray, trail: deque) -> None:
                    (intensity, intensity, intensity), -1)
 
 
+def _draw_dashed_line(frame: np.ndarray, p0: tuple, p1: tuple, clr, seg_len: int = 10) -> None:
+    H, W = frame.shape[:2]
+    x0, y0 = p0
+    x1, y1 = p1
+    length = math.hypot(x1 - x0, y1 - y0)
+    if length < 1e-3:
+        return
+    n_segs = max(1, int(length // seg_len))
+    for i in range(n_segs):
+        t0, t1 = i / n_segs, (i + 0.5) / n_segs
+        if i % 2 != 0:
+            continue
+        sx, sy = x0 + (x1 - x0) * t0, y0 + (y1 - y0) * t0
+        ex, ey = x0 + (x1 - x0) * t1, y0 + (y1 - y0) * t1
+        if (0 <= sx < W and 0 <= sy < H) or (0 <= ex < W and 0 <= ey < H):
+            cv2.line(frame, (int(sx), int(sy)), (int(ex), int(ey)), clr, 2, cv2.LINE_AA)
+
+
 def _draw_wm_markers(frame: np.ndarray, wm: BallWorldModel, mgr: HomographyManager) -> None:
     """Draw possession anchor (cyan diamond) and trajectory target (white cross)."""
     ctx = wm.context
@@ -140,6 +161,14 @@ def _draw_wm_markers(frame: np.ndarray, wm: BallWorldModel, mgr: HomographyManag
                 s = 6
                 cv2.line(frame, (ex-s, ey), (ex+s, ey), EXPECT_CLR, 1, cv2.LINE_AA)
                 cv2.line(frame, (ex, ey-s), (ex, ey+s), EXPECT_CLR, 1, cv2.LINE_AA)
+
+    # Pass corridor — magenta dashed line, carrier to predicted receiver (WorldModelV2 only)
+    corridor = getattr(wm, "corridor_m", None)
+    if corridor is not None and mgr is not None and mgr.is_valid():
+        p0 = _pitch_to_image(corridor[0], mgr)
+        p1 = _pitch_to_image(corridor[1], mgr)
+        if p0 is not None and p1 is not None:
+            _draw_dashed_line(frame, p0, p1, CORRIDOR_CLR)
 
 
 def _draw_event_badge(frame: np.ndarray, wm: BallWorldModel) -> None:
@@ -281,7 +310,7 @@ def main() -> None:
         assigner.fit(fit_frames, fit_dets)
 
         engine      = PitchAnalyticsEngine(mgr, fps=loader.fps)
-        world_model = BallWorldModel(fps=loader.fps)
+        world_model = WorldModelV2(fps=loader.fps)
 
     print(f"Clip    : {clip_path.name}")
     print(f"Window  : {args.start:.0f}s – {args.start + args.duration:.0f}s  ({n_frames} frames)")

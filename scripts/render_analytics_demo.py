@@ -44,7 +44,7 @@ from gaffer.tracking.ball_candidate_filter import BallCandidateFilter
 from gaffer.tracking.ball_state_estimator import BallStateEstimator
 from gaffer.tracking.ball_tracker import BallTracker
 from gaffer.tracking.tracker import PlayerTracker
-from gaffer.tracking.world_model import BallWorldModel
+from gaffer.tracking.world_model_v2 import WorldModelV2
 from gaffer.video.loader import VideoLoader
 from gaffer.video.writer import VideoWriter
 
@@ -94,7 +94,7 @@ def main() -> None:
     ball_tracker    = BallTracker()
     ball_filter     = BallCandidateFilter()
     ball_state      = BallStateEstimator()
-    world_model     = BallWorldModel(fps=loader.fps)
+    world_model     = WorldModelV2(fps=loader.fps)
     engine          = PitchAnalyticsEngine(mgr, fps=loader.fps,
                                            image_size=(loader.width, loader.height))
     overlay         = AnalyticsOverlay()

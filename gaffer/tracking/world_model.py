@@ -175,6 +175,17 @@ class BallWorldModel:
         if candidate_m is None:
             return 0.15   # off-pitch — not zero in case H is slightly stale
 
+        signals = self._signals(candidate_m)
+        return sum(signals) / len(signals) if signals else 0.5
+
+    def _signals(self, candidate_m: tuple[float, float]) -> list[float]:
+        """
+        Core v1.0 signal set.  Subclasses (e.g. WorldModelV2) extend this by
+        calling super()._signals() and appending additional signals — each
+        appended signal gets equal weight in the final average, so only
+        append when the signal is actually informative for this candidate
+        (return early / skip otherwise, mirroring signals 1-2 below).
+        """
         signals: list[float] = []
 
         # ── Signal 1: possession anchor proximity (strongest)
@@ -199,7 +210,7 @@ class BallWorldModel:
         # ── Signal 4: event-context modifiers
         signals.append(self._event_score(candidate_m))
 
-        return sum(signals) / len(signals)
+        return signals
 
     def effective_confidence(
         self,
