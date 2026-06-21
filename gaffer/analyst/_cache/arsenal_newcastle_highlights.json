@@ -1,0 +1,2065 @@
+{
+  "clip_name": "arsenal_newcastle_highlights",
+  "duration_s": 120.0,
+  "events": [
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 0.12,
+      "data": {
+        "lane": "right_half_space",
+        "third": "middle",
+        "count_for": 2,
+        "count_against": 0,
+        "space_control_pct": 100.0
+      }
+    },
+    {
+      "event_type": "compact_block",
+      "team": "teamB",
+      "time_s": 0.24,
+      "data": {
+        "width_m": 33.3,
+        "area_m2": 485.0
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 0.24,
+      "data": {
+        "lane": "left_half_space",
+        "third": "attacking",
+        "count_for": 2,
+        "count_against": 0,
+        "space_control_pct": 55.5
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 0.24,
+      "data": {
+        "lane": "centre",
+        "third": "middle",
+        "count_for": 2,
+        "count_against": 0,
+        "space_control_pct": 89.2
+      }
+    },
+    {
+      "event_type": "compact_block",
+      "team": "teamA",
+      "time_s": 0.48,
+      "data": {
+        "width_m": 29.8,
+        "area_m2": 658.0
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 0.6,
+      "data": {
+        "lane": "right_half_space",
+        "third": "middle",
+        "count_for": 4,
+        "count_against": 2,
+        "space_control_pct": 41.9
+      }
+    },
+    {
+      "event_type": "compact_block",
+      "team": "teamB",
+      "time_s": 0.84,
+      "data": {
+        "width_m": 32.4,
+        "area_m2": 468.0
+      }
+    },
+    {
+      "event_type": "high_press",
+      "team": "teamB",
+      "time_s": 0.96,
+      "data": {
+        "intensity": 4
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 0.96,
+      "data": {
+        "lane": "right_half_space",
+        "third": "middle",
+        "count_for": 8,
+        "count_against": 1,
+        "space_control_pct": 92.9
+      }
+    },
+    {
+      "event_type": "high_press_ended",
+      "team": "teamB",
+      "time_s": 1.08,
+      "data": {
+        "peak_streak": 2
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 2.28,
+      "data": {
+        "lane": "centre",
+        "third": "middle",
+        "count_for": 2,
+        "count_against": 0,
+        "space_control_pct": 45.5
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 3.12,
+      "data": {
+        "lane": "right_half_space",
+        "third": "middle",
+        "count_for": 5,
+        "count_against": 2,
+        "space_control_pct": 69.3
+      }
+    },
+    {
+      "event_type": "high_press",
+      "team": "teamB",
+      "time_s": 3.24,
+      "data": {
+        "intensity": 3
+      }
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 3.48,
+      "data": {
+        "from": "teamA",
+        "to": "teamB"
+      }
+    },
+    {
+      "event_type": "high_press_ended",
+      "team": "teamA",
+      "time_s": 3.48,
+      "data": {
+        "peak_streak": 3
+      }
+    },
+    {
+      "event_type": "high_press",
+      "team": "teamA",
+      "time_s": 4.32,
+      "data": {
+        "intensity": 3
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 4.32,
+      "data": {
+        "lane": "right_half_space",
+        "third": "middle",
+        "count_for": 5,
+        "count_against": 2,
+        "space_control_pct": 79.9
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 4.32,
+      "data": {
+        "lane": "right_wing",
+        "third": "middle",
+        "count_for": 3,
+        "count_against": 1,
+        "space_control_pct": 88.3
+      }
+    },
+    {
+      "event_type": "high_press_ended",
+      "team": "teamA",
+      "time_s": 4.68,
+      "data": {
+        "peak_streak": 4
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 4.92,
+      "data": {
+        "lane": "centre",
+        "third": "middle",
+        "count_for": 2,
+        "count_against": 0,
+        "space_control_pct": 73.2
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 5.76,
+      "data": {
+        "track_id": 53,
+        "speed_ms": 8.2
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 6.72,
+      "data": {
+        "track_id": 98,
+        "speed_ms": 8.1
+      }
+    },
+    {
+      "event_type": "pass",
+      "team": "teamB",
+      "time_s": 6.72,
+      "data": {
+        "sender_id": 69,
+        "receiver_id": 98,
+        "distance_m": 14.0,
+        "duration_s": 2.04,
+        "speed_ms": 6.9,
+        "direction": "forward"
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 6.96,
+      "data": {
+        "track_id": 102,
+        "speed_ms": 10.0
+      }
+    },
+    {
+      "event_type": "high_press",
+      "team": "teamA",
+      "time_s": 7.08,
+      "data": {
+        "intensity": 3
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 7.08,
+      "data": {
+        "track_id": 98
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 7.08,
+      "data": {
+        "lane": "right_half_space",
+        "third": "middle",
+        "count_for": 3,
+        "count_against": 1,
+        "space_control_pct": 71.9
+      }
+    },
+    {
+      "event_type": "high_press_ended",
+      "team": "teamA",
+      "time_s": 7.2,
+      "data": {
+        "peak_streak": 2
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 7.32,
+      "data": {
+        "track_id": 106,
+        "speed_ms": 7.2
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 7.44,
+      "data": {
+        "track_id": 107,
+        "speed_ms": 7.3
+      }
+    },
+    {
+      "event_type": "pass",
+      "team": "teamB",
+      "time_s": 7.56,
+      "data": {
+        "sender_id": 98,
+        "receiver_id": 112,
+        "distance_m": 7.8,
+        "duration_s": 0.84,
+        "speed_ms": 9.3,
+        "direction": "lateral"
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 7.8,
+      "data": {
+        "lane": "right_wing",
+        "third": "middle",
+        "count_for": 4,
+        "count_against": 1,
+        "space_control_pct": 43.4
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 7.92,
+      "data": {
+        "track_id": 113,
+        "speed_ms": 10.8
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 8.04,
+      "data": {
+        "lane": "centre",
+        "third": "middle",
+        "count_for": 3,
+        "count_against": 0,
+        "space_control_pct": 98.5
+      }
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 8.28,
+      "data": {
+        "from": "teamB",
+        "to": "teamA"
+      }
+    },
+    {
+      "event_type": "high_press",
+      "team": "teamB",
+      "time_s": 8.4,
+      "data": {
+        "intensity": 5
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 8.52,
+      "data": {
+        "track_id": 107
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 8.52,
+      "data": {
+        "track_id": 113
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 8.52,
+      "data": {
+        "lane": "right_wing",
+        "third": "middle",
+        "count_for": 4,
+        "count_against": 1,
+        "space_control_pct": 53.4
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 8.64,
+      "data": {
+        "lane": "left_half_space",
+        "third": "middle",
+        "count_for": 2,
+        "count_against": 0,
+        "space_control_pct": 77.0
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 9.0,
+      "data": {
+        "lane": "right_half_space",
+        "third": "middle",
+        "count_for": 4,
+        "count_against": 1,
+        "space_control_pct": 66.1
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 9.36,
+      "data": {
+        "track_id": 126,
+        "speed_ms": 8.8
+      }
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 9.6,
+      "data": {
+        "from": "teamA",
+        "to": "teamB"
+      }
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamB",
+      "time_s": 9.6,
+      "data": {
+        "seconds_ago": 1.3
+      }
+    },
+    {
+      "event_type": "counter_attack",
+      "team": "teamB",
+      "time_s": 9.6,
+      "data": {
+        "fwd_m": 6.3,
+        "window_s": 3.0
+      }
+    },
+    {
+      "event_type": "high_press_ended",
+      "team": "teamA",
+      "time_s": 9.72,
+      "data": {
+        "peak_streak": 11
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 9.72,
+      "data": {
+        "lane": "centre",
+        "third": "middle",
+        "count_for": 4,
+        "count_against": 0,
+        "space_control_pct": 96.8
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 9.96,
+      "data": {
+        "track_id": 112,
+        "speed_ms": 13.7
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 9.96,
+      "data": {
+        "track_id": 114,
+        "speed_ms": 9.4
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 10.08,
+      "data": {
+        "track_id": 112
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 10.08,
+      "data": {
+        "track_id": 131,
+        "speed_ms": 10.0
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 10.44,
+      "data": {
+        "track_id": 135,
+        "speed_ms": 13.3
+      }
+    },
+    {
+      "event_type": "pass",
+      "team": "teamB",
+      "time_s": 10.44,
+      "data": {
+        "sender_id": 114,
+        "receiver_id": 112,
+        "distance_m": 6.1,
+        "duration_s": 0.24,
+        "speed_ms": 25.2,
+        "direction": "forward"
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 10.56,
+      "data": {
+        "track_id": 112,
+        "speed_ms": 12.9
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 10.8,
+      "data": {
+        "track_id": 112
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 10.8,
+      "data": {
+        "track_id": 114
+      }
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 11.04,
+      "data": {
+        "def_team": "teamB",
+        "def_line_x": 76.6
+      }
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamB",
+      "time_s": 11.16,
+      "data": {
+        "def_team": "teamA",
+        "def_line_x": 76.5
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 11.16,
+      "data": {
+        "track_id": 99,
+        "speed_ms": 7.3
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 11.16,
+      "data": {
+        "lane": "centre",
+        "third": "middle",
+        "count_for": 3,
+        "count_against": 0,
+        "space_control_pct": 99.9
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 11.28,
+      "data": {
+        "lane": "left_half_space",
+        "third": "middle",
+        "count_for": 3,
+        "count_against": 0,
+        "space_control_pct": 98.9
+      }
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 11.52,
+      "data": {
+        "from": "teamB",
+        "to": "teamA"
+      }
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamA",
+      "time_s": 11.52,
+      "data": {
+        "seconds_ago": 1.9
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 11.52,
+      "data": {
+        "track_id": 112,
+        "speed_ms": 7.6
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 11.64,
+      "data": {
+        "track_id": 144,
+        "speed_ms": 9.9
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 11.76,
+      "data": {
+        "track_id": 131
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 11.76,
+      "data": {
+        "track_id": 145,
+        "speed_ms": 7.9
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 11.88,
+      "data": {
+        "track_id": 151,
+        "speed_ms": 8.4
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 12.0,
+      "data": {
+        "track_id": 153,
+        "speed_ms": 8.8
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 12.24,
+      "data": {
+        "track_id": 119,
+        "speed_ms": 8.4
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 12.24,
+      "data": {
+        "track_id": 154,
+        "speed_ms": 7.7
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 12.36,
+      "data": {
+        "lane": "left_half_space",
+        "third": "attacking",
+        "count_for": 4,
+        "count_against": 2,
+        "space_control_pct": 48.4
+      }
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 12.48,
+      "data": {
+        "from": "teamA",
+        "to": "teamB"
+      }
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamB",
+      "time_s": 12.48,
+      "data": {
+        "seconds_ago": 1.0
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 12.6,
+      "data": {
+        "track_id": 119
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 12.6,
+      "data": {
+        "track_id": 154
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 12.72,
+      "data": {
+        "track_id": 151
+      }
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 12.84,
+      "data": {
+        "def_team": "teamB",
+        "def_line_x": 84.7
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 12.84,
+      "data": {
+        "track_id": 145
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 12.84,
+      "data": {
+        "track_id": 157,
+        "speed_ms": 8.1
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 12.84,
+      "data": {
+        "track_id": 159,
+        "speed_ms": 8.3
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 12.84,
+      "data": {
+        "lane": "left_half_space",
+        "third": "middle",
+        "count_for": 2,
+        "count_against": 0,
+        "space_control_pct": 95.5
+      }
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamB",
+      "time_s": 12.96,
+      "data": {
+        "def_team": "teamA",
+        "def_line_x": 81.0
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 12.96,
+      "data": {
+        "track_id": 131,
+        "speed_ms": 7.9
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 12.96,
+      "data": {
+        "track_id": 159
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 13.08,
+      "data": {
+        "track_id": 153
+      }
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 13.32,
+      "data": {
+        "def_team": "teamB",
+        "def_line_x": 87.7
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 13.8,
+      "data": {
+        "track_id": 112
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 14.28,
+      "data": {
+        "track_id": 152,
+        "speed_ms": 7.1
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 14.28,
+      "data": {
+        "track_id": 160,
+        "speed_ms": 9.4
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 14.28,
+      "data": {
+        "track_id": 164,
+        "speed_ms": 15.4
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 14.64,
+      "data": {
+        "track_id": 151,
+        "speed_ms": 9.4
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 15.12,
+      "data": {
+        "track_id": 150,
+        "speed_ms": 7.1
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 18.6,
+      "data": {
+        "track_id": 128,
+        "speed_ms": 11.2
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 18.6,
+      "data": {
+        "track_id": 187,
+        "speed_ms": 7.6
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 18.84,
+      "data": {
+        "track_id": 187
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 19.08,
+      "data": {
+        "track_id": 191,
+        "speed_ms": 34.2
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 19.56,
+      "data": {
+        "track_id": 193,
+        "speed_ms": 18.2
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 19.56,
+      "data": {
+        "lane": "left_half_space",
+        "third": "attacking",
+        "count_for": 2,
+        "count_against": 0,
+        "space_control_pct": 87.5
+      }
+    },
+    {
+      "event_type": "compact_block",
+      "team": "teamB",
+      "time_s": 19.68,
+      "data": {
+        "width_m": 21.6,
+        "area_m2": 148.0
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 19.8,
+      "data": {
+        "track_id": 197,
+        "speed_ms": 8.9
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 19.92,
+      "data": {
+        "track_id": 198,
+        "speed_ms": 17.6
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 20.04,
+      "data": {
+        "track_id": 197
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 20.16,
+      "data": {
+        "track_id": 198
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 20.64,
+      "data": {
+        "track_id": 193
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 20.64,
+      "data": {
+        "track_id": 197,
+        "speed_ms": 28.0
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 20.76,
+      "data": {
+        "track_id": 176,
+        "speed_ms": 22.4
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 20.88,
+      "data": {
+        "track_id": 202,
+        "speed_ms": 23.5
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 21.12,
+      "data": {
+        "track_id": 198,
+        "speed_ms": 21.0
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 21.24,
+      "data": {
+        "track_id": 213,
+        "speed_ms": 17.8
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 21.48,
+      "data": {
+        "track_id": 204,
+        "speed_ms": 14.1
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 21.48,
+      "data": {
+        "track_id": 201,
+        "speed_ms": 13.5
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 21.6,
+      "data": {
+        "track_id": 198
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 21.6,
+      "data": {
+        "track_id": 201
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 21.72,
+      "data": {
+        "track_id": 202
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 21.72,
+      "data": {
+        "track_id": 204
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 21.84,
+      "data": {
+        "track_id": 213
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 22.8,
+      "data": {
+        "track_id": 198,
+        "speed_ms": 22.4
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 22.8,
+      "data": {
+        "track_id": 202,
+        "speed_ms": 12.9
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 22.8,
+      "data": {
+        "track_id": 201,
+        "speed_ms": 7.2
+      }
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamB",
+      "time_s": 22.92,
+      "data": {
+        "def_team": "teamA",
+        "def_line_x": 105.2
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 23.4,
+      "data": {
+        "track_id": 204,
+        "speed_ms": 16.9
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 24.0,
+      "data": {
+        "track_id": 226,
+        "speed_ms": 20.6
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 24.96,
+      "data": {
+        "track_id": 231,
+        "speed_ms": 7.3
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 25.32,
+      "data": {
+        "track_id": 231
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 25.68,
+      "data": {
+        "track_id": 245,
+        "speed_ms": 19.0
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 31.68,
+      "data": {
+        "track_id": 300,
+        "speed_ms": 13.1
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 31.8,
+      "data": {
+        "track_id": 301,
+        "speed_ms": 10.5
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 32.04,
+      "data": {
+        "track_id": 301
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 32.4,
+      "data": {
+        "track_id": 301,
+        "speed_ms": 21.2
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 33.36,
+      "data": {
+        "track_id": 312,
+        "speed_ms": 39.2
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 33.6,
+      "data": {
+        "track_id": 314,
+        "speed_ms": 16.6
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 33.6,
+      "data": {
+        "track_id": 316,
+        "speed_ms": 24.3
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 33.84,
+      "data": {
+        "track_id": 312
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 34.56,
+      "data": {
+        "track_id": 317,
+        "speed_ms": 15.9
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 35.64,
+      "data": {
+        "track_id": 326,
+        "speed_ms": 23.7
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 35.88,
+      "data": {
+        "track_id": 315,
+        "speed_ms": 16.9
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 37.8,
+      "data": {
+        "track_id": 326
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 38.28,
+      "data": {
+        "track_id": 326,
+        "speed_ms": 12.0
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 38.4,
+      "data": {
+        "track_id": 326
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 40.8,
+      "data": {
+        "track_id": 326,
+        "speed_ms": 11.1
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 41.04,
+      "data": {
+        "track_id": 326
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 41.76,
+      "data": {
+        "track_id": 326,
+        "speed_ms": 13.9
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 41.88,
+      "data": {
+        "track_id": 378,
+        "speed_ms": 8.2
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 42.36,
+      "data": {
+        "track_id": 378
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 42.84,
+      "data": {
+        "track_id": 395,
+        "speed_ms": 10.8
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 43.44,
+      "data": {
+        "track_id": 399,
+        "speed_ms": 45.7
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 43.56,
+      "data": {
+        "track_id": 378,
+        "speed_ms": 11.5
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 43.92,
+      "data": {
+        "track_id": 408,
+        "speed_ms": 31.7
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 44.04,
+      "data": {
+        "track_id": 410,
+        "speed_ms": 7.4
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 44.16,
+      "data": {
+        "track_id": 408
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 44.16,
+      "data": {
+        "track_id": 410
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 44.4,
+      "data": {
+        "track_id": 409,
+        "speed_ms": 12.2
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 44.52,
+      "data": {
+        "track_id": 407,
+        "speed_ms": 15.4
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 44.64,
+      "data": {
+        "track_id": 410,
+        "speed_ms": 16.5
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 44.76,
+      "data": {
+        "track_id": 408,
+        "speed_ms": 22.4
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 46.8,
+      "data": {
+        "track_id": 409
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamA",
+      "time_s": 47.16,
+      "data": {
+        "track_id": 410
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 48.12,
+      "data": {
+        "track_id": 409,
+        "speed_ms": 11.5
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 48.24,
+      "data": {
+        "track_id": 409
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 48.72,
+      "data": {
+        "track_id": 410,
+        "speed_ms": 16.0
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 112.92,
+      "data": {
+        "track_id": 879,
+        "speed_ms": 17.7
+      }
+    },
+    {
+      "event_type": "sprint_end",
+      "team": "teamB",
+      "time_s": 113.16,
+      "data": {
+        "track_id": 879
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 113.16,
+      "data": {
+        "track_id": 860,
+        "speed_ms": 34.7
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 113.64,
+      "data": {
+        "track_id": 879,
+        "speed_ms": 12.3
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 114.96,
+      "data": {
+        "track_id": 891,
+        "speed_ms": 23.2
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 115.68,
+      "data": {
+        "track_id": 913,
+        "speed_ms": 27.4
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 116.88,
+      "data": {
+        "track_id": 911,
+        "speed_ms": 11.3
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 117.48,
+      "data": {
+        "track_id": 916,
+        "speed_ms": 12.7
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 118.08,
+      "data": {
+        "track_id": 906,
+        "speed_ms": 31.9
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 118.44,
+      "data": {
+        "track_id": 905,
+        "speed_ms": 13.0
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamB",
+      "time_s": 118.44,
+      "data": {
+        "track_id": 940,
+        "speed_ms": 19.7
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": "teamA",
+      "time_s": 119.4,
+      "data": {
+        "track_id": 947,
+        "speed_ms": 17.2
+      }
+    }
+  ],
+  "episodes": [
+    {
+      "episode_id": 1,
+      "team": "teamA",
+      "start_time_s": 0.0,
+      "end_time_s": 3.48,
+      "outcome": "Attacking Third Entry",
+      "distance_advanced_m": -7.4,
+      "possession_chain": [],
+      "players": [],
+      "events": [
+        {
+          "event_type": "compact_block",
+          "team": "teamA",
+          "time_s": 0.48,
+          "data": {
+            "width_m": 29.8,
+            "area_m2": 658.0
+          }
+        }
+      ]
+    },
+    {
+      "episode_id": 2,
+      "team": "teamB",
+      "start_time_s": 3.48,
+      "end_time_s": 8.28,
+      "outcome": "Lost Possession",
+      "distance_advanced_m": 23.5,
+      "possession_chain": [
+        "#69",
+        "#98",
+        "#112"
+      ],
+      "players": [
+        "#112",
+        "#69",
+        "#98"
+      ],
+      "events": [
+        {
+          "event_type": "high_press",
+          "team": "teamB",
+          "time_s": 0.96,
+          "data": {
+            "intensity": 4
+          }
+        },
+        {
+          "event_type": "high_press",
+          "team": "teamB",
+          "time_s": 3.24,
+          "data": {
+            "intensity": 3
+          }
+        },
+        {
+          "event_type": "possession_change",
+          "team": "teamB",
+          "time_s": 3.48,
+          "data": {
+            "from": "teamA",
+            "to": "teamB"
+          }
+        },
+        {
+          "event_type": "overload",
+          "team": "teamB",
+          "time_s": 4.32,
+          "data": {
+            "lane": "right_half_space",
+            "third": "middle",
+            "count_for": 5,
+            "count_against": 2,
+            "space_control_pct": 79.9
+          }
+        },
+        {
+          "event_type": "overload",
+          "team": "teamB",
+          "time_s": 4.92,
+          "data": {
+            "lane": "centre",
+            "third": "middle",
+            "count_for": 2,
+            "count_against": 0,
+            "space_control_pct": 73.2
+          }
+        },
+        {
+          "event_type": "sprint_start",
+          "team": "teamB",
+          "time_s": 6.72,
+          "data": {
+            "track_id": 98,
+            "speed_ms": 8.1
+          }
+        },
+        {
+          "event_type": "pass",
+          "team": "teamB",
+          "time_s": 6.72,
+          "data": {
+            "sender_id": 69,
+            "receiver_id": 98,
+            "distance_m": 14.0,
+            "duration_s": 2.04,
+            "speed_ms": 6.9,
+            "direction": "forward"
+          }
+        },
+        {
+          "event_type": "sprint_end",
+          "team": "teamB",
+          "time_s": 7.08,
+          "data": {
+            "track_id": 98
+          }
+        },
+        {
+          "event_type": "overload",
+          "team": "teamB",
+          "time_s": 7.08,
+          "data": {
+            "lane": "right_half_space",
+            "third": "middle",
+            "count_for": 3,
+            "count_against": 1,
+            "space_control_pct": 71.9
+          }
+        },
+        {
+          "event_type": "pass",
+          "team": "teamB",
+          "time_s": 7.56,
+          "data": {
+            "sender_id": 98,
+            "receiver_id": 112,
+            "distance_m": 7.8,
+            "duration_s": 0.84,
+            "speed_ms": 9.3,
+            "direction": "lateral"
+          }
+        },
+        {
+          "event_type": "overload",
+          "team": "teamB",
+          "time_s": 7.8,
+          "data": {
+            "lane": "right_wing",
+            "third": "middle",
+            "count_for": 4,
+            "count_against": 1,
+            "space_control_pct": 43.4
+          }
+        },
+        {
+          "event_type": "overload",
+          "team": "teamB",
+          "time_s": 8.04,
+          "data": {
+            "lane": "centre",
+            "third": "middle",
+            "count_for": 3,
+            "count_against": 0,
+            "space_control_pct": 98.5
+          }
+        }
+      ]
+    },
+    {
+      "episode_id": 3,
+      "team": "teamA",
+      "start_time_s": 8.28,
+      "end_time_s": 9.6,
+      "outcome": "Lost Possession",
+      "distance_advanced_m": -4.1,
+      "possession_chain": [],
+      "players": [],
+      "events": [
+        {
+          "event_type": "high_press",
+          "team": "teamA",
+          "time_s": 4.32,
+          "data": {
+            "intensity": 3
+          }
+        },
+        {
+          "event_type": "high_press",
+          "team": "teamA",
+          "time_s": 7.08,
+          "data": {
+            "intensity": 3
+          }
+        },
+        {
+          "event_type": "possession_change",
+          "team": "teamA",
+          "time_s": 8.28,
+          "data": {
+            "from": "teamB",
+            "to": "teamA"
+          }
+        },
+        {
+          "event_type": "sprint_end",
+          "team": "teamA",
+          "time_s": 8.52,
+          "data": {
+            "track_id": 113
+          }
+        }
+      ]
+    },
+    {
+      "episode_id": 4,
+      "team": "teamB",
+      "start_time_s": 9.6,
+      "end_time_s": 11.52,
+      "outcome": "Counter",
+      "distance_advanced_m": 24.2,
+      "possession_chain": [
+        "ST",
+        "LS"
+      ],
+      "players": [
+        "LS",
+        "ST"
+      ],
+      "events": [
+        {
+          "event_type": "high_press",
+          "team": "teamB",
+          "time_s": 8.4,
+          "data": {
+            "intensity": 5
+          }
+        },
+        {
+          "event_type": "possession_change",
+          "team": "teamB",
+          "time_s": 9.6,
+          "data": {
+            "from": "teamA",
+            "to": "teamB"
+          }
+        },
+        {
+          "event_type": "possession_recovery",
+          "team": "teamB",
+          "time_s": 9.6,
+          "data": {
+            "seconds_ago": 1.3
+          }
+        },
+        {
+          "event_type": "counter_attack",
+          "team": "teamB",
+          "time_s": 9.6,
+          "data": {
+            "fwd_m": 6.3,
+            "window_s": 3.0
+          }
+        },
+        {
+          "event_type": "overload",
+          "team": "teamB",
+          "time_s": 9.72,
+          "data": {
+            "lane": "centre",
+            "third": "middle",
+            "count_for": 4,
+            "count_against": 0,
+            "space_control_pct": 96.8
+          }
+        },
+        {
+          "event_type": "sprint_start",
+          "team": "teamB",
+          "time_s": 9.96,
+          "data": {
+            "track_id": 114,
+            "speed_ms": 9.4
+          }
+        },
+        {
+          "event_type": "sprint_start",
+          "team": "teamB",
+          "time_s": 10.44,
+          "data": {
+            "track_id": 135,
+            "speed_ms": 13.3
+          }
+        },
+        {
+          "event_type": "pass",
+          "team": "teamB",
+          "time_s": 10.44,
+          "data": {
+            "sender_id": 114,
+            "receiver_id": 112,
+            "distance_m": 6.1,
+            "duration_s": 0.24,
+            "speed_ms": 25.2,
+            "direction": "forward"
+          }
+        },
+        {
+          "event_type": "sprint_start",
+          "team": "teamB",
+          "time_s": 10.56,
+          "data": {
+            "track_id": 112,
+            "speed_ms": 12.9
+          }
+        },
+        {
+          "event_type": "sprint_end",
+          "team": "teamB",
+          "time_s": 10.8,
+          "data": {
+            "track_id": 112
+          }
+        },
+        {
+          "event_type": "sprint_end",
+          "team": "teamB",
+          "time_s": 10.8,
+          "data": {
+            "track_id": 114
+          }
+        },
+        {
+          "event_type": "line_break",
+          "team": "teamB",
+          "time_s": 11.16,
+          "data": {
+            "def_team": "teamA",
+            "def_line_x": 76.5
+          }
+        },
+        {
+          "event_type": "sprint_start",
+          "team": "teamB",
+          "time_s": 11.16,
+          "data": {
+            "track_id": 99,
+            "speed_ms": 7.3
+          }
+        },
+        {
+          "event_type": "overload",
+          "team": "teamB",
+          "time_s": 11.16,
+          "data": {
+            "lane": "centre",
+            "third": "middle",
+            "count_for": 3,
+            "count_against": 0,
+            "space_control_pct": 99.9
+          }
+        },
+        {
+          "event_type": "overload",
+          "team": "teamB",
+          "time_s": 11.28,
+          "data": {
+            "lane": "left_half_space",
+            "third": "middle",
+            "count_for": 3,
+            "count_against": 0,
+            "space_control_pct": 98.9
+          }
+        }
+      ]
+    },
+    {
+      "episode_id": 5,
+      "team": "teamA",
+      "start_time_s": 11.52,
+      "end_time_s": 12.48,
+      "outcome": "Lost Possession",
+      "distance_advanced_m": null,
+      "possession_chain": [],
+      "players": [],
+      "events": [
+        {
+          "event_type": "possession_change",
+          "team": "teamA",
+          "time_s": 11.52,
+          "data": {
+            "from": "teamB",
+            "to": "teamA"
+          }
+        },
+        {
+          "event_type": "possession_recovery",
+          "team": "teamA",
+          "time_s": 11.52,
+          "data": {
+            "seconds_ago": 1.9
+          }
+        },
+        {
+          "event_type": "sprint_end",
+          "team": "teamA",
+          "time_s": 11.76,
+          "data": {
+            "track_id": 131
+          }
+        }
+      ]
+    }
+  ],
+  "match_report": {
+    "possession_pct": [
+      46.6,
+      53.4
+    ],
+    "space_control_pct": [
+      53.4,
+      46.6
+    ],
+    "total_passes": 3,
+    "progressive_passes": 0,
+    "line_breaks": 6,
+    "overloads": 22,
+    "dominance_periods": 0,
+    "top_episode_ids": [
+      4,
+      2,
+      3
+    ]
+  },
+  "pass_network_report": {
+    "most_frequent": {
+      "sender": "#69",
+      "receiver": "#98",
+      "count": 1
+    },
+    "progressive_leaders": [],
+    "hub_players": [
+      {
+        "label": "#98",
+        "degree": 2,
+        "involvement": 2,
+        "centrality": 0.6666666666666666
+      },
+      {
+        "label": "LS",
+        "degree": 2,
+        "involvement": 2,
+        "centrality": 0.6666666666666666
+      },
+      {
+        "label": "#69",
+        "degree": 1,
+        "involvement": 1,
+        "centrality": 0.3333333333333333
+      }
+    ],
+    "longest_buildup": [
+      "#69",
+      "#98",
+      "LS"
+    ]
+  },
+  "possession": {
+    "teamA_pct": 46.6,
+    "teamB_pct": 53.4,
+    "frames": 88
+  }
+}

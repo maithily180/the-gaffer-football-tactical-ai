@@ -3,7 +3,7 @@ evaluation/evaluate_ball_tracking.py
 ───────────────────────────────────────
 E1 — Ball tracking evaluation: v1.0 (BallWorldModel) vs v2.0 (WorldModelV2).
 
-Runs both world models on each calibrated clip via clip_runner.run_clip()
+Runs both world models on each calibrated clip via pipeline_runner.run_clip()
 and builds a comparison table. "Recoveries" and "suspect discards" are not
 new metrics -- they're BallCandidateFilter's own self-reported counters
 (gaffer/tracking/ball_candidate_filter.py:267, rejection_summary()).
@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from evaluation.clip_runner import ClipRunResult, run_clip
+from gaffer.analysis.pipeline_runner import ClipRunResult, run_clip
 from gaffer.tracking.world_model import BallWorldModel
 from gaffer.tracking.world_model_v2 import WorldModelV2
 

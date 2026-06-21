@@ -1,19 +1,25 @@
 """
-evaluation/clip_runner.py
-───────────────────────────
-Shared instrumented pipeline runner for the evaluation suite.
+gaffer/analysis/pipeline_runner.py
+───────────────────────────────────
+Shared instrumented pipeline runner. Originally built for the evaluation
+suite (evaluation/clip_runner.py) and relocated here in v2.0 so the new
+gaffer/analyst/ query engine can reuse the exact same headless run instead
+of duplicating ~150 lines of already-validated orchestration. evaluation/
+imports from here now; this module has no dependency on evaluation/.
 
 Re-runs the exact perception loop scripts/render_analytics_demo.py uses
 (detect -> team-assign -> track -> ball-filter -> ball-track -> ball-state
 -> engine.update() -> world_model.update()), headless -- no overlay, no
-video output, because this is analysis, not a demo. Parametrized by which
-world-model class drives the ball filter, so the same function produces
-both the v1.0 and v2.0 runs evaluate_ball_tracking.py compares.
+video output. Parametrized by which world-model class drives the ball
+filter, so the same function produces both the v1.0 and v2.0 runs
+evaluate_ball_tracking.py compares, as well as the single v2.0 run
+gaffer/analyst/match_bundle.py needs.
 
 Every metric here is either pulled straight from an existing public method
-(engine.episodes_so_far(), engine.pass_network(), world_model.score_candidate_px(),
-ball_filter.rejection_summary()) or, where nothing upstream tracks it yet,
-accumulated inline:
+(engine.episodes_so_far(), engine.pass_network(), engine.match_report(),
+engine.pass_network_report(), engine.possession_summary(),
+world_model.score_candidate_px(), ball_filter.rejection_summary()) or, where
+nothing upstream tracks it yet, accumulated inline:
   - ball live/extrapolated/lost classification (from ball_tracker's own
     confidence convention -- not new, just counted)
   - attacking-third entries per team (snap.ball_region + attack_dir, the
@@ -30,6 +36,8 @@ from pathlib import Path
 
 from gaffer.analytics.engine import PitchAnalyticsEngine
 from gaffer.analytics.episodes import Episode
+from gaffer.analytics.match_report import MatchReport
+from gaffer.analytics.pass_network_analytics import PassNetworkReport
 from gaffer.calibration.homography_manager import HomographyManager
 from gaffer.calibration.homography_propagator import HomographyPropagator
 from gaffer.detection.detector import FootballDetector
@@ -59,6 +67,9 @@ class ClipRunResult:
     pass_net_checkpoints:     dict[float, dict[tuple[int, int], int]] = field(default_factory=dict)
     attacking_third_entries:  dict[str, list[float]] = field(default_factory=dict)
     roles:                    dict = field(default_factory=dict)      # track_id -> PlayerRole, best-known by run end
+    match_report:             MatchReport | None = None
+    pass_network_report:      PassNetworkReport | None = None
+    possession:                dict = field(default_factory=dict)
 
 
 def run_clip(
@@ -214,4 +225,7 @@ def run_clip(
         pass_net_checkpoints=pass_net_checkpoints,
         attacking_third_entries=attacking_third_entries,
         roles=engine.roles_known(),
+        match_report=engine.match_report(),
+        pass_network_report=engine.pass_network_report(),
+        possession=engine.possession_summary(),
     )

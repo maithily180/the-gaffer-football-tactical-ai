@@ -15,7 +15,7 @@ from __future__ import annotations
 import statistics
 from collections import defaultdict
 
-from evaluation.clip_runner import ClipRunResult
+from gaffer.analysis.pipeline_runner import ClipRunResult
 
 
 def evaluate(results: list[ClipRunResult]) -> dict:
@@ -76,7 +76,7 @@ def conclusion(summary: dict) -> str:
 
 if __name__ == "__main__":
     from gaffer import config
-    from evaluation.clip_runner import run_clip
+    from gaffer.analysis.pipeline_runner import run_clip
     from gaffer.tracking.world_model_v2 import WorldModelV2
 
     clips = [

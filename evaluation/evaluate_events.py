@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import math
 
-from evaluation.clip_runner import ClipRunResult
+from gaffer.analysis.pipeline_runner import ClipRunResult
 from gaffer.events.base import DOMINANCE, OVERLOAD, PROGRESSIVE_PASS
 
 _DEFAULT_WINDOW_S = 5.0

@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from evaluation import evaluate_ball_tracking, evaluate_episodes, evaluate_events, evaluate_networks
-from evaluation.clip_runner import ClipRunResult, run_clip
+from gaffer.analysis.pipeline_runner import ClipRunResult, run_clip
 from gaffer import config
 from gaffer.analytics.roles import PlayerRole
 from gaffer.tracking.world_model import BallWorldModel
