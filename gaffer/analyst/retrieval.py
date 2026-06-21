@@ -27,6 +27,10 @@ _SUPPORTING_OUTCOMES = {"Counter", "Line Break", "Attacking Third Entry"}
 
 def retrieve(bundle: MatchBundle, qtype: QuestionType, *,
              team: str | None = None, event_type: str | None = None) -> dict:
+    if qtype is QuestionType.UNSUPPORTED:
+        # classify() passes the human-readable reason through the event_type
+        # slot for this one question type -- see question_types.py docstring.
+        return {"empty": True, "reason": event_type or "Gaffer doesn't track this"}
     if qtype is QuestionType.MATCH_SUMMARY:
         return _retrieve_match_summary(bundle)
     if qtype is QuestionType.DOMINANCE_EXPLANATION:
@@ -47,7 +51,11 @@ def _count_by_team(events: list[FootballEvent], event_type: str) -> dict[str, in
 
 
 def _retrieve_match_summary(bundle: MatchBundle) -> dict:
-    return {"match_report": bundle.match_report}
+    return {
+        "match_report": bundle.match_report,
+        "formation_a": bundle.formation_a,
+        "formation_b": bundle.formation_b,
+    }
 
 
 def _retrieve_dominance(bundle: MatchBundle, team: str | None) -> dict:

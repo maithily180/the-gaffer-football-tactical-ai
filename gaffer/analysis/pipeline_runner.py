@@ -70,6 +70,8 @@ class ClipRunResult:
     match_report:             MatchReport | None = None
     pass_network_report:      PassNetworkReport | None = None
     possession:                dict = field(default_factory=dict)
+    formation_a:              str | None = None                        # e.g. "4-3-3", most-recent-window estimate
+    formation_b:              str | None = None
 
 
 def run_clip(
@@ -125,6 +127,14 @@ def run_clip(
     next_ckpt_i = 0
     pass_net_checkpoints: dict[float, dict] = {}
 
+    # Last-known-good, not literally-last-frame: formation_a/b is a rolling-
+    # window estimate that can legitimately read None on any single frame
+    # (camera angle, occlusion, end-of-clip cut) even when it was confidently
+    # non-None moments earlier -- same "trust the best-known state, not just
+    # the final instant" rule roles.py's RoleTracker already follows.
+    last_formation_a: str | None = None
+    last_formation_b: str | None = None
+
     for frame_idx, frame in loader.frames(start=start_frame, count=n_total):
         dets = detector.detect(frame, frame_idx)
         dets = assigner.assign(frame, dets)
@@ -179,6 +189,10 @@ def run_clip(
         # ── events + attacking-third entries ─────────────────────────────
         if snap is not None:
             all_events.extend(snap.events)
+            if snap.formation_a is not None:
+                last_formation_a = snap.formation_a.formation_str
+            if snap.formation_b is not None:
+                last_formation_b = snap.formation_b.formation_str
             time_s = frame_idx / loader.fps
             for team, shape in (("teamA", snap.team_a), ("teamB", snap.team_b)):
                 target = _ATK_THIRD_FOR_DIR.get(shape.attack_dir)
@@ -192,6 +206,9 @@ def run_clip(
         while next_ckpt_i < len(checkpoints_sorted) and frac_done >= checkpoints_sorted[next_ckpt_i]:
             pass_net_checkpoints[checkpoints_sorted[next_ckpt_i]] = dict(engine.pass_network())
             next_ckpt_i += 1
+
+    formation_a = last_formation_a
+    formation_b = last_formation_b
 
     loader.close()
     if cur_run > 0:
@@ -228,4 +245,6 @@ def run_clip(
         match_report=engine.match_report(),
         pass_network_report=engine.pass_network_report(),
         possession=engine.possession_summary(),
+        formation_a=formation_a,
+        formation_b=formation_b,
     )

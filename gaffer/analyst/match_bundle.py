@@ -42,6 +42,8 @@ class MatchBundle:
     match_report:        MatchReport
     pass_network_report: PassNetworkReport
     possession:          dict
+    formation_a:         str | None = None
+    formation_b:         str | None = None
 
 
 def build_bundle(clip_path: Path, calib_path: Path, *, force: bool = False) -> MatchBundle:
@@ -59,6 +61,8 @@ def build_bundle(clip_path: Path, calib_path: Path, *, force: bool = False) -> M
         match_report=run.match_report,
         pass_network_report=run.pass_network_report,
         possession=run.possession,
+        formation_a=run.formation_a,
+        formation_b=run.formation_b,
     )
     CACHE_DIR.mkdir(exist_ok=True)
     cache_path.write_text(json.dumps(_serialize(bundle), indent=2, default=_json_default))
@@ -129,6 +133,8 @@ def _serialize(bundle: MatchBundle) -> dict:
             "longest_buildup": pnr.longest_buildup,
         },
         "possession": bundle.possession,
+        "formation_a": bundle.formation_a,
+        "formation_b": bundle.formation_b,
     }
 
 
@@ -170,15 +176,19 @@ def _deserialize(data: dict) -> MatchBundle:
         longest_buildup=pnr_d["longest_buildup"],
     )
 
+    formation_a = data.get("formation_a")
+    formation_b = data.get("formation_b")
     run = ClipRunResult(
         clip_name=data["clip_name"], world_model_name="v2.0",
         n_frames=0, duration_s=data["duration_s"], fps=0.0, ball_metrics={},
         events=events, episodes=episodes,
         match_report=match_report, pass_network_report=pass_network_report,
         possession=data["possession"],
+        formation_a=formation_a, formation_b=formation_b,
     )
     return MatchBundle(
         clip_name=data["clip_name"], run=run,
         match_report=match_report, pass_network_report=pass_network_report,
         possession=data["possession"],
+        formation_a=formation_a, formation_b=formation_b,
     )

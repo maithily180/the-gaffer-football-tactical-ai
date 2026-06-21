@@ -44,12 +44,44 @@ def build_evidence(question: str, qtype: QuestionType, retrieved: dict) -> Evide
     if retrieved.get("empty"):
         return EvidencePack(question=question, empty=True,
                              empty_reason=retrieved.get("reason", "no matching data"))
+    # A 3B local model loses track of which fact answers the question once a
+    # full match-summary evidence list (11+ items) is on the page -- seen in
+    # practice answering "what formation" from unrelated Overload-episode
+    # text instead of the Formation line that was right there. For a
+    # question this narrow, hand it only the one relevant fact.
+    if qtype is QuestionType.MATCH_SUMMARY and "formation" in question.lower():
+        ev = _build_formation_only(retrieved)
+        if ev is None:
+            return EvidencePack(question=question, empty=True,
+                                 empty_reason="not enough players were tracked to estimate a formation in this match")
+        return EvidencePack(question=question, evidence=ev)
     return EvidencePack(question=question, evidence=_BUILDERS[qtype](retrieved))
+
+
+def _build_formation_only(r: dict) -> list[Evidence] | None:
+    fa, fb = r.get("formation_a"), r.get("formation_b")
+    if not fa and not fb:
+        return None
+    return [Evidence(
+        "Formation (rough estimate)",
+        f"Team A {fa or 'unknown'} - Team B {fb or 'unknown'} -- based on a 30s rolling "
+        "window of tracked players, may be incomplete or not sum to 11",
+        "run.formation_a/formation_b",
+    )]
 
 
 def _build_match_summary(r: dict) -> list[Evidence]:
     mr = r["match_report"]
-    ev = [
+    ev = []
+    fa, fb = r.get("formation_a"), r.get("formation_b")
+    if fa or fb:
+        ev.append(Evidence(
+            "Formation (rough estimate)",
+            f"Team A {fa or 'unknown'} - Team B {fb or 'unknown'} -- based on a 30s rolling "
+            "window of tracked players, may be incomplete or not sum to 11",
+            "run.formation_a/formation_b",
+        ))
+    ev += [
         Evidence("Possession", f"Team A {mr.possession_pct[0]:.0f}% - Team B {mr.possession_pct[1]:.0f}%",
                   "match_report.possession_pct"),
         Evidence("Space control", f"Team A {mr.space_control_pct[0]:.0f}% - Team B {mr.space_control_pct[1]:.0f}%",

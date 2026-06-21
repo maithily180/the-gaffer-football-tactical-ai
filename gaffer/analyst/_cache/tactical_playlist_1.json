@@ -1733,5 +1733,7 @@
     "teamA_pct": 34.7,
     "teamB_pct": 65.3,
     "frames": 352
-  }
+  },
+  "formation_a": "2-5-8",
+  "formation_b": "7-4-1"
 }
