@@ -221,6 +221,13 @@ class PitchAnalyticsEngine:
         return label_pass_network(self._pass_detector.pass_network(),
                                   self._role_tracker.all_known())
 
+    def roles_known(self) -> dict[int, PlayerRole]:
+        """Every track_id's best-known role so far -- the same mapping
+        labeled_pass_network() uses internally, exposed so callers can label
+        an arbitrary historical pass_network() snapshot (e.g. a checkpoint
+        captured earlier in the run), not just the live cumulative one."""
+        return self._role_tracker.all_known()
+
     def pass_network_report(self, top_n: int = 3) -> PassNetworkReport:
         """Most frequent connection, top progressive connections, hub players
         (degree centrality), and the longest build-up chain so far — all in

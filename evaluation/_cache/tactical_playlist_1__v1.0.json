@@ -1,0 +1,1949 @@
+{
+  "clip_name": "tactical_playlist_1",
+  "world_model_name": "v1.0",
+  "n_frames": 1000,
+  "duration_s": 120.0,
+  "fps": 25,
+  "ball_metrics": {
+    "n_detection_frames": 1000,
+    "n_live": 219,
+    "n_extrapolated": 195,
+    "n_lost": 586,
+    "lost_pct": 58.6,
+    "mean_continuity_frames": 19.7,
+    "median_continuity_frames": 9,
+    "n_lost_streaks": 20,
+    "mean_wm_score": 0.775,
+    "rejection_summary": {
+      "stationary": 1,
+      "spatial": 605,
+      "proximity": 0,
+      "off_pitch": 0,
+      "scene_cuts": 0,
+      "recovery_accept": 20,
+      "suspect_discards": 2
+    }
+  },
+  "events": [
+    {
+      "event_type": "line_break",
+      "team": "teamB",
+      "time_s": 3.72
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 3.84
+    },
+    {
+      "event_type": "high_press",
+      "team": "teamA",
+      "time_s": 4.32
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 4.32
+    },
+    {
+      "event_type": "compact_block",
+      "team": "teamA",
+      "time_s": 4.44
+    },
+    {
+      "event_type": "compact_block",
+      "team": "teamB",
+      "time_s": 4.68
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 5.88
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 6.0
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 6.48
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 6.84
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 7.32
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 7.68
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 7.8
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 9.72
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 12.48
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 15.72
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamB",
+      "time_s": 15.72
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 15.96
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 16.32
+    },
+    {
+      "event_type": "pass",
+      "team": "teamB",
+      "time_s": 16.32
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 16.8
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 17.04
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 18.12
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamA",
+      "time_s": 18.12
+    },
+    {
+      "event_type": "counter_attack",
+      "team": "teamA",
+      "time_s": 18.12
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 18.48
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamB",
+      "time_s": 18.48
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 18.96
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamA",
+      "time_s": 18.96
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 19.44
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 19.8
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 21.24
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamB",
+      "time_s": 21.24
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 21.24
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 22.68
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 26.04
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 26.88
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 27.12
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 56.52
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 57.48
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 75.12
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 76.08
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamA",
+      "time_s": 76.08
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 76.68
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamB",
+      "time_s": 76.68
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 77.04
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamA",
+      "time_s": 77.04
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 77.52
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamB",
+      "time_s": 77.52
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 78.84
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamA",
+      "time_s": 78.84
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 81.48
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamB",
+      "time_s": 81.48
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 83.04
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamA",
+      "time_s": 83.04
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamB",
+      "time_s": 83.28
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 84.6
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 86.28
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 87.48
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 88.08
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 88.56
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 89.64
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 91.68
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 92.88
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamA",
+      "time_s": 92.88
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 93.36
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamB",
+      "time_s": 93.36
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 94.2
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamA",
+      "time_s": 94.2
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 94.56
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamB",
+      "time_s": 94.56
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 95.04
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamA",
+      "time_s": 95.04
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 95.4
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamB",
+      "time_s": 95.4
+    },
+    {
+      "event_type": "pass",
+      "team": "teamB",
+      "time_s": 98.64
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 101.04
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamB",
+      "time_s": 101.16
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 101.88
+    },
+    {
+      "event_type": "high_press_ended",
+      "team": "teamB",
+      "time_s": 102.12
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamB",
+      "time_s": 102.48
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 105.12
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 105.84
+    },
+    {
+      "event_type": "high_press",
+      "team": "teamB",
+      "time_s": 107.52
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 111.96
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 112.08
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 113.64
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 114.36
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 118.2
+    }
+  ],
+  "episodes": [
+    {
+      "outcome": "Lost Possession",
+      "duration_s": 8.4,
+      "n_events": 1
+    },
+    {
+      "outcome": "Attacking Third Entry",
+      "duration_s": 3.2,
+      "n_events": 1
+    },
+    {
+      "outcome": "Lost Possession",
+      "duration_s": 2.4,
+      "n_events": 3
+    },
+    {
+      "outcome": "Counter",
+      "duration_s": 0.4,
+      "n_events": 3
+    },
+    {
+      "outcome": "Lost Possession",
+      "duration_s": 0.5,
+      "n_events": 2
+    },
+    {
+      "outcome": "Line Break",
+      "duration_s": 2.3,
+      "n_events": 4
+    },
+    {
+      "outcome": "Sustained Possession",
+      "duration_s": 36.2,
+      "n_events": 2
+    },
+    {
+      "outcome": "Attacking Third Entry",
+      "duration_s": 17.6,
+      "n_events": 1
+    },
+    {
+      "outcome": "Lost Possession",
+      "duration_s": 1.0,
+      "n_events": 1
+    },
+    {
+      "outcome": "Attacking Third Entry",
+      "duration_s": 0.6,
+      "n_events": 2
+    },
+    {
+      "outcome": "Lost Possession",
+      "duration_s": 0.4,
+      "n_events": 2
+    },
+    {
+      "outcome": "Lost Possession",
+      "duration_s": 0.5,
+      "n_events": 2
+    },
+    {
+      "outcome": "Lost Possession",
+      "duration_s": 1.3,
+      "n_events": 2
+    },
+    {
+      "outcome": "Attacking Third Entry",
+      "duration_s": 2.6,
+      "n_events": 2
+    },
+    {
+      "outcome": "Lost Possession",
+      "duration_s": 1.6,
+      "n_events": 2
+    },
+    {
+      "outcome": "Attacking Third Entry",
+      "duration_s": 8.6,
+      "n_events": 8
+    },
+    {
+      "outcome": "Lost Possession",
+      "duration_s": 1.2,
+      "n_events": 1
+    },
+    {
+      "outcome": "Attacking Third Entry",
+      "duration_s": 0.5,
+      "n_events": 2
+    },
+    {
+      "outcome": "Lost Possession",
+      "duration_s": 0.8,
+      "n_events": 2
+    },
+    {
+      "outcome": "Lost Possession",
+      "duration_s": 0.4,
+      "n_events": 2
+    },
+    {
+      "outcome": "Lost Possession",
+      "duration_s": 0.5,
+      "n_events": 2
+    },
+    {
+      "outcome": "Attacking Third Entry",
+      "duration_s": 0.4,
+      "n_events": 2
+    },
+    {
+      "outcome": "Lost Possession",
+      "duration_s": 5.6,
+      "n_events": 3
+    },
+    {
+      "outcome": "Lost Possession",
+      "duration_s": 10.9,
+      "n_events": 4
+    }
+  ],
+  "pass_net_checkpoints": {
+    "1.0": [
+      [
+        [
+          139,
+          159
+        ],
+        1
+      ],
+      [
+        [
+          798,
+          812
+        ],
+        1
+      ]
+    ]
+  },
+  "attacking_third_entries": {
+    "teamA": [
+      3.84,
+      9.36,
+      12.48,
+      14.76,
+      23.88,
+      24.84,
+      28.32,
+      56.52,
+      58.92,
+      74.64,
+      75.24,
+      75.96,
+      76.8,
+      78.0,
+      78.36,
+      79.56,
+      79.92,
+      81.0,
+      82.56,
+      91.44,
+      93.24,
+      93.48,
+      94.08,
+      94.8,
+      96.12,
+      96.36,
+      97.08,
+      111.96,
+      117.6
+    ],
+    "teamB": [
+      3.72
+    ]
+  },
+  "roles": {
+    "20": {
+      "role": "LB",
+      "line": "defense"
+    },
+    "48": {
+      "role": "LCB",
+      "line": "defense"
+    },
+    "22": {
+      "role": "RCB",
+      "line": "defense"
+    },
+    "46": {
+      "role": "RB",
+      "line": "defense"
+    },
+    "6": {
+      "role": "LCM",
+      "line": "midfield"
+    },
+    "8": {
+      "role": "LS",
+      "line": "attack"
+    },
+    "54": {
+      "role": "RCM",
+      "line": "midfield"
+    },
+    "60": {
+      "role": "RW",
+      "line": "attack"
+    },
+    "84": {
+      "role": "LW",
+      "line": "attack"
+    },
+    "92": {
+      "role": "LM",
+      "line": "midfield"
+    },
+    "19": {
+      "role": "DEF1",
+      "line": "defense"
+    },
+    "63": {
+      "role": "DEF3",
+      "line": "defense"
+    },
+    "88": {
+      "role": "DEF4",
+      "line": "midfield"
+    },
+    "61": {
+      "role": "DEF5",
+      "line": "defense"
+    },
+    "90": {
+      "role": "DEF6",
+      "line": "defense"
+    },
+    "89": {
+      "role": "DEF7",
+      "line": "defense"
+    },
+    "35": {
+      "role": "LM",
+      "line": "midfield"
+    },
+    "83": {
+      "role": "ST",
+      "line": "attack"
+    },
+    "95": {
+      "role": "RCM",
+      "line": "midfield"
+    },
+    "93": {
+      "role": "LCM",
+      "line": "attack"
+    },
+    "97": {
+      "role": "RB",
+      "line": "defense"
+    },
+    "98": {
+      "role": "LS",
+      "line": "attack"
+    },
+    "94": {
+      "role": "DEF2",
+      "line": "defense"
+    },
+    "100": {
+      "role": "RCM",
+      "line": "midfield"
+    },
+    "103": {
+      "role": "LB",
+      "line": "defense"
+    },
+    "105": {
+      "role": "RM",
+      "line": "midfield"
+    },
+    "113": {
+      "role": "CM",
+      "line": "attack"
+    },
+    "117": {
+      "role": "LCB",
+      "line": "defense"
+    },
+    "114": {
+      "role": "RM",
+      "line": "midfield"
+    },
+    "115": {
+      "role": "FWD2",
+      "line": "midfield"
+    },
+    "123": {
+      "role": "DEF10",
+      "line": "attack"
+    },
+    "128": {
+      "role": "MID1",
+      "line": "defense"
+    },
+    "129": {
+      "role": "DEF12",
+      "line": "midfield"
+    },
+    "127": {
+      "role": "FWD4",
+      "line": "attack"
+    },
+    "126": {
+      "role": "MID5",
+      "line": "defense"
+    },
+    "132": {
+      "role": "DEF11",
+      "line": "attack"
+    },
+    "134": {
+      "role": "FWD1",
+      "line": "midfield"
+    },
+    "133": {
+      "role": "FWD2",
+      "line": "attack"
+    },
+    "131": {
+      "role": "FWD3",
+      "line": "attack"
+    },
+    "139": {
+      "role": "FWD5",
+      "line": "attack"
+    },
+    "112": {
+      "role": "MID7",
+      "line": "attack"
+    },
+    "152": {
+      "role": "RCB",
+      "line": "defense"
+    },
+    "153": {
+      "role": "DEF7",
+      "line": "defense"
+    },
+    "154": {
+      "role": "LCB",
+      "line": "midfield"
+    },
+    "158": {
+      "role": "MID2",
+      "line": "attack"
+    },
+    "161": {
+      "role": "RCM",
+      "line": "defense"
+    },
+    "160": {
+      "role": "MID7",
+      "line": "midfield"
+    },
+    "163": {
+      "role": "DEF5",
+      "line": "defense"
+    },
+    "176": {
+      "role": "MID9",
+      "line": "midfield"
+    },
+    "180": {
+      "role": "DEF2",
+      "line": "midfield"
+    },
+    "179": {
+      "role": "DEF3",
+      "line": "defense"
+    },
+    "184": {
+      "role": "RB",
+      "line": "defense"
+    },
+    "181": {
+      "role": "ST",
+      "line": "attack"
+    },
+    "186": {
+      "role": "FWD1",
+      "line": "attack"
+    },
+    "185": {
+      "role": "DEF4",
+      "line": "defense"
+    },
+    "192": {
+      "role": "DEF8",
+      "line": "midfield"
+    },
+    "178": {
+      "role": "DEF1",
+      "line": "defense"
+    },
+    "189": {
+      "role": "RCB",
+      "line": "midfield"
+    },
+    "203": {
+      "role": "DEF3",
+      "line": "midfield"
+    },
+    "201": {
+      "role": "CB",
+      "line": "defense"
+    },
+    "214": {
+      "role": "DEF1",
+      "line": "midfield"
+    },
+    "219": {
+      "role": "DEF2",
+      "line": "midfield"
+    },
+    "223": {
+      "role": "DEF6",
+      "line": "attack"
+    },
+    "228": {
+      "role": "DEF6",
+      "line": "midfield"
+    },
+    "205": {
+      "role": "DEF8",
+      "line": "defense"
+    },
+    "245": {
+      "role": "DEF12",
+      "line": "defense"
+    },
+    "248": {
+      "role": "DEF6",
+      "line": "defense"
+    },
+    "247": {
+      "role": "DEF6",
+      "line": "defense"
+    },
+    "254": {
+      "role": "ST",
+      "line": "attack"
+    },
+    "256": {
+      "role": "DEF3",
+      "line": "defense"
+    },
+    "244": {
+      "role": "RCM",
+      "line": "midfield"
+    },
+    "255": {
+      "role": "RW",
+      "line": "midfield"
+    },
+    "252": {
+      "role": "RS",
+      "line": "midfield"
+    },
+    "258": {
+      "role": "DEF4",
+      "line": "midfield"
+    },
+    "265": {
+      "role": "LW",
+      "line": "midfield"
+    },
+    "261": {
+      "role": "DEF5",
+      "line": "midfield"
+    },
+    "270": {
+      "role": "MID1",
+      "line": "attack"
+    },
+    "274": {
+      "role": "DEF3",
+      "line": "defense"
+    },
+    "278": {
+      "role": "DEF1",
+      "line": "defense"
+    },
+    "282": {
+      "role": "DEF2",
+      "line": "defense"
+    },
+    "283": {
+      "role": "DEF2",
+      "line": "midfield"
+    },
+    "287": {
+      "role": "GK",
+      "line": "goalkeeper"
+    },
+    "291": {
+      "role": "FWD4",
+      "line": "midfield"
+    },
+    "296": {
+      "role": "ST",
+      "line": "attack"
+    },
+    "303": {
+      "role": "RCM",
+      "line": "midfield"
+    },
+    "310": {
+      "role": "RCM",
+      "line": "attack"
+    },
+    "315": {
+      "role": "DEF1",
+      "line": "defense"
+    },
+    "317": {
+      "role": "DEF4",
+      "line": "defense"
+    },
+    "320": {
+      "role": "GK",
+      "line": "goalkeeper"
+    },
+    "323": {
+      "role": "DEF7",
+      "line": "defense"
+    },
+    "324": {
+      "role": "DEF1",
+      "line": "defense"
+    },
+    "326": {
+      "role": "DEF9",
+      "line": "defense"
+    },
+    "327": {
+      "role": "DM",
+      "line": "attack"
+    },
+    "330": {
+      "role": "LCM",
+      "line": "midfield"
+    },
+    "331": {
+      "role": "DEF10",
+      "line": "defense"
+    },
+    "333": {
+      "role": "DEF2",
+      "line": "midfield"
+    },
+    "336": {
+      "role": "DEF2",
+      "line": "defense"
+    },
+    "337": {
+      "role": "DEF6",
+      "line": "defense"
+    },
+    "339": {
+      "role": "ST",
+      "line": "attack"
+    },
+    "338": {
+      "role": "DEF3",
+      "line": "defense"
+    },
+    "340": {
+      "role": "DEF8",
+      "line": "defense"
+    },
+    "350": {
+      "role": "CM",
+      "line": "midfield"
+    },
+    "348": {
+      "role": "DEF5",
+      "line": "defense"
+    },
+    "352": {
+      "role": "LS",
+      "line": "attack"
+    },
+    "353": {
+      "role": "DEF12",
+      "line": "defense"
+    },
+    "357": {
+      "role": "DM",
+      "line": "midfield"
+    },
+    "358": {
+      "role": "DEF9",
+      "line": "defense"
+    },
+    "359": {
+      "role": "RS",
+      "line": "attack"
+    },
+    "364": {
+      "role": "DEF5",
+      "line": "defense"
+    },
+    "368": {
+      "role": "DEF8",
+      "line": "defense"
+    },
+    "367": {
+      "role": "DEF6",
+      "line": "defense"
+    },
+    "376": {
+      "role": "LCB",
+      "line": "defense"
+    },
+    "380": {
+      "role": "RCM",
+      "line": "midfield"
+    },
+    "377": {
+      "role": "FWD4",
+      "line": "defense"
+    },
+    "383": {
+      "role": "LS",
+      "line": "attack"
+    },
+    "385": {
+      "role": "LCM",
+      "line": "midfield"
+    },
+    "386": {
+      "role": "DEF2",
+      "line": "attack"
+    },
+    "391": {
+      "role": "RS",
+      "line": "attack"
+    },
+    "392": {
+      "role": "DEF7",
+      "line": "defense"
+    },
+    "390": {
+      "role": "CM",
+      "line": "midfield"
+    },
+    "396": {
+      "role": "DEF1",
+      "line": "defense"
+    },
+    "397": {
+      "role": "DEF9",
+      "line": "midfield"
+    },
+    "398": {
+      "role": "DEF3",
+      "line": "defense"
+    },
+    "400": {
+      "role": "LW",
+      "line": "attack"
+    },
+    "401": {
+      "role": "DEF11",
+      "line": "defense"
+    },
+    "402": {
+      "role": "DEF2",
+      "line": "defense"
+    },
+    "405": {
+      "role": "RS",
+      "line": "defense"
+    },
+    "407": {
+      "role": "DEF2",
+      "line": "midfield"
+    },
+    "408": {
+      "role": "DEF5",
+      "line": "defense"
+    },
+    "409": {
+      "role": "LCM",
+      "line": "attack"
+    },
+    "410": {
+      "role": "MID5",
+      "line": "defense"
+    },
+    "388": {
+      "role": "ST",
+      "line": "midfield"
+    },
+    "413": {
+      "role": "DEF12",
+      "line": "defense"
+    },
+    "414": {
+      "role": "DEF10",
+      "line": "defense"
+    },
+    "416": {
+      "role": "ST",
+      "line": "attack"
+    },
+    "417": {
+      "role": "DEF7",
+      "line": "defense"
+    },
+    "421": {
+      "role": "RM",
+      "line": "attack"
+    },
+    "426": {
+      "role": "LCM",
+      "line": "attack"
+    },
+    "425": {
+      "role": "DEF8",
+      "line": "defense"
+    },
+    "437": {
+      "role": "RCM",
+      "line": "attack"
+    },
+    "435": {
+      "role": "DEF4",
+      "line": "defense"
+    },
+    "441": {
+      "role": "FWD2",
+      "line": "attack"
+    },
+    "442": {
+      "role": "DEF14",
+      "line": "midfield"
+    },
+    "432": {
+      "role": "RCM",
+      "line": "midfield"
+    },
+    "445": {
+      "role": "FWD6",
+      "line": "attack"
+    },
+    "448": {
+      "role": "FWD3",
+      "line": "attack"
+    },
+    "451": {
+      "role": "FWD1",
+      "line": "attack"
+    },
+    "449": {
+      "role": "LCM",
+      "line": "midfield"
+    },
+    "456": {
+      "role": "FWD5",
+      "line": "attack"
+    },
+    "457": {
+      "role": "DEF3",
+      "line": "defense"
+    },
+    "459": {
+      "role": "DEF11",
+      "line": "midfield"
+    },
+    "460": {
+      "role": "CB",
+      "line": "attack"
+    },
+    "462": {
+      "role": "DEF13",
+      "line": "midfield"
+    },
+    "461": {
+      "role": "DEF15",
+      "line": "defense"
+    },
+    "463": {
+      "role": "DEF17",
+      "line": "defense"
+    },
+    "464": {
+      "role": "DEF6",
+      "line": "defense"
+    },
+    "468": {
+      "role": "ST",
+      "line": "midfield"
+    },
+    "474": {
+      "role": "LCM",
+      "line": "attack"
+    },
+    "479": {
+      "role": "FWD1",
+      "line": "attack"
+    },
+    "480": {
+      "role": "DEF8",
+      "line": "defense"
+    },
+    "481": {
+      "role": "DEF7",
+      "line": "defense"
+    },
+    "485": {
+      "role": "FWD2",
+      "line": "attack"
+    },
+    "486": {
+      "role": "RCB",
+      "line": "defense"
+    },
+    "489": {
+      "role": "MID11",
+      "line": "defense"
+    },
+    "493": {
+      "role": "MID10",
+      "line": "defense"
+    },
+    "495": {
+      "role": "MID1",
+      "line": "defense"
+    },
+    "497": {
+      "role": "FWD4",
+      "line": "attack"
+    },
+    "496": {
+      "role": "MID7",
+      "line": "defense"
+    },
+    "503": {
+      "role": "FWD1",
+      "line": "midfield"
+    },
+    "508": {
+      "role": "FWD3",
+      "line": "attack"
+    },
+    "526": {
+      "role": "RCM",
+      "line": "midfield"
+    },
+    "524": {
+      "role": "CB",
+      "line": "defense"
+    },
+    "529": {
+      "role": "FWD5",
+      "line": "attack"
+    },
+    "527": {
+      "role": "LM",
+      "line": "defense"
+    },
+    "534": {
+      "role": "CB",
+      "line": "defense"
+    },
+    "530": {
+      "role": "FWD4",
+      "line": "defense"
+    },
+    "531": {
+      "role": "FWD5",
+      "line": "midfield"
+    },
+    "536": {
+      "role": "FWD3",
+      "line": "attack"
+    },
+    "544": {
+      "role": "FWD6",
+      "line": "attack"
+    },
+    "547": {
+      "role": "FWD2",
+      "line": "midfield"
+    },
+    "546": {
+      "role": "FWD5",
+      "line": "midfield"
+    },
+    "565": {
+      "role": "LCM",
+      "line": "defense"
+    },
+    "573": {
+      "role": "FWD1",
+      "line": "attack"
+    },
+    "572": {
+      "role": "LCM",
+      "line": "midfield"
+    },
+    "574": {
+      "role": "RM",
+      "line": "defense"
+    },
+    "569": {
+      "role": "FWD4",
+      "line": "attack"
+    },
+    "580": {
+      "role": "FWD2",
+      "line": "defense"
+    },
+    "587": {
+      "role": "FWD4",
+      "line": "defense"
+    },
+    "608": {
+      "role": "LCB",
+      "line": "defense"
+    },
+    "610": {
+      "role": "LS",
+      "line": "attack"
+    },
+    "599": {
+      "role": "MID2",
+      "line": "defense"
+    },
+    "615": {
+      "role": "MID2",
+      "line": "defense"
+    },
+    "624": {
+      "role": "DEF2",
+      "line": "defense"
+    },
+    "623": {
+      "role": "DEF4",
+      "line": "defense"
+    },
+    "625": {
+      "role": "ST",
+      "line": "defense"
+    },
+    "629": {
+      "role": "CM",
+      "line": "attack"
+    },
+    "632": {
+      "role": "DEF7",
+      "line": "defense"
+    },
+    "634": {
+      "role": "DEF1",
+      "line": "defense"
+    },
+    "635": {
+      "role": "RCB",
+      "line": "midfield"
+    },
+    "637": {
+      "role": "MID6",
+      "line": "defense"
+    },
+    "639": {
+      "role": "MID6",
+      "line": "defense"
+    },
+    "643": {
+      "role": "MID5",
+      "line": "midfield"
+    },
+    "644": {
+      "role": "MID1",
+      "line": "midfield"
+    },
+    "647": {
+      "role": "MID3",
+      "line": "midfield"
+    },
+    "646": {
+      "role": "FWD4",
+      "line": "midfield"
+    },
+    "652": {
+      "role": "DEF9",
+      "line": "defense"
+    },
+    "653": {
+      "role": "RCM",
+      "line": "defense"
+    },
+    "656": {
+      "role": "DEF2",
+      "line": "defense"
+    },
+    "661": {
+      "role": "DEF6",
+      "line": "midfield"
+    },
+    "666": {
+      "role": "DEF2",
+      "line": "attack"
+    },
+    "667": {
+      "role": "DEF8",
+      "line": "attack"
+    },
+    "665": {
+      "role": "RS",
+      "line": "attack"
+    },
+    "669": {
+      "role": "DEF8",
+      "line": "defense"
+    },
+    "672": {
+      "role": "DEF4",
+      "line": "defense"
+    },
+    "675": {
+      "role": "LCM",
+      "line": "attack"
+    },
+    "676": {
+      "role": "ST",
+      "line": "midfield"
+    },
+    "681": {
+      "role": "DEF1",
+      "line": "attack"
+    },
+    "687": {
+      "role": "DEF12",
+      "line": "defense"
+    },
+    "692": {
+      "role": "DEF6",
+      "line": "defense"
+    },
+    "697": {
+      "role": "DEF9",
+      "line": "defense"
+    },
+    "700": {
+      "role": "LCM",
+      "line": "defense"
+    },
+    "703": {
+      "role": "RM",
+      "line": "attack"
+    },
+    "705": {
+      "role": "DEF10",
+      "line": "defense"
+    },
+    "707": {
+      "role": "DEF7",
+      "line": "midfield"
+    },
+    "712": {
+      "role": "CB",
+      "line": "midfield"
+    },
+    "713": {
+      "role": "MID9",
+      "line": "defense"
+    },
+    "714": {
+      "role": "DEF5",
+      "line": "defense"
+    },
+    "716": {
+      "role": "DEF1",
+      "line": "defense"
+    },
+    "715": {
+      "role": "CM",
+      "line": "defense"
+    },
+    "728": {
+      "role": "FWD12",
+      "line": "midfield"
+    },
+    "740": {
+      "role": "CB",
+      "line": "midfield"
+    },
+    "737": {
+      "role": "MID3",
+      "line": "midfield"
+    },
+    "739": {
+      "role": "FWD9",
+      "line": "midfield"
+    },
+    "741": {
+      "role": "DEF4",
+      "line": "defense"
+    },
+    "742": {
+      "role": "DEF12",
+      "line": "defense"
+    },
+    "743": {
+      "role": "MID1",
+      "line": "midfield"
+    },
+    "745": {
+      "role": "DEF3",
+      "line": "defense"
+    },
+    "744": {
+      "role": "RCM",
+      "line": "defense"
+    },
+    "750": {
+      "role": "ST",
+      "line": "attack"
+    },
+    "749": {
+      "role": "DEF2",
+      "line": "attack"
+    },
+    "753": {
+      "role": "MID5",
+      "line": "midfield"
+    },
+    "762": {
+      "role": "MID7",
+      "line": "attack"
+    },
+    "777": {
+      "role": "ST",
+      "line": "attack"
+    },
+    "781": {
+      "role": "MID12",
+      "line": "attack"
+    },
+    "782": {
+      "role": "MID11",
+      "line": "attack"
+    },
+    "785": {
+      "role": "CB",
+      "line": "defense"
+    },
+    "788": {
+      "role": "MID2",
+      "line": "attack"
+    },
+    "784": {
+      "role": "MID4",
+      "line": "attack"
+    },
+    "786": {
+      "role": "DEF9",
+      "line": "defense"
+    },
+    "789": {
+      "role": "DEF10",
+      "line": "defense"
+    },
+    "790": {
+      "role": "RM",
+      "line": "midfield"
+    },
+    "793": {
+      "role": "MID9",
+      "line": "attack"
+    },
+    "802": {
+      "role": "DEF2",
+      "line": "defense"
+    },
+    "803": {
+      "role": "RCM",
+      "line": "defense"
+    },
+    "804": {
+      "role": "MID11",
+      "line": "attack"
+    },
+    "807": {
+      "role": "MID5",
+      "line": "attack"
+    },
+    "796": {
+      "role": "MID13",
+      "line": "attack"
+    },
+    "814": {
+      "role": "MID3",
+      "line": "attack"
+    },
+    "812": {
+      "role": "LM",
+      "line": "midfield"
+    },
+    "810": {
+      "role": "MID7",
+      "line": "defense"
+    },
+    "820": {
+      "role": "MID18",
+      "line": "midfield"
+    },
+    "825": {
+      "role": "MID15",
+      "line": "midfield"
+    },
+    "823": {
+      "role": "DEF5",
+      "line": "defense"
+    },
+    "830": {
+      "role": "RM",
+      "line": "midfield"
+    },
+    "833": {
+      "role": "LM",
+      "line": "defense"
+    },
+    "834": {
+      "role": "FWD1",
+      "line": "attack"
+    },
+    "836": {
+      "role": "FWD6",
+      "line": "attack"
+    },
+    "847": {
+      "role": "FWD2",
+      "line": "defense"
+    },
+    "848": {
+      "role": "FWD3",
+      "line": "midfield"
+    },
+    "851": {
+      "role": "FWD4",
+      "line": "midfield"
+    },
+    "859": {
+      "role": "LCB",
+      "line": "defense"
+    },
+    "858": {
+      "role": "FWD2",
+      "line": "midfield"
+    },
+    "855": {
+      "role": "LCM",
+      "line": "midfield"
+    },
+    "856": {
+      "role": "LCB",
+      "line": "defense"
+    },
+    "863": {
+      "role": "MID4",
+      "line": "midfield"
+    },
+    "864": {
+      "role": "MID6",
+      "line": "defense"
+    },
+    "874": {
+      "role": "MID3",
+      "line": "defense"
+    },
+    "877": {
+      "role": "LCM",
+      "line": "defense"
+    },
+    "876": {
+      "role": "FWD4",
+      "line": "defense"
+    },
+    "878": {
+      "role": "FWD10",
+      "line": "midfield"
+    },
+    "879": {
+      "role": "FWD5",
+      "line": "midfield"
+    },
+    "883": {
+      "role": "DEF2",
+      "line": "defense"
+    },
+    "872": {
+      "role": "MID5",
+      "line": "midfield"
+    },
+    "890": {
+      "role": "RW",
+      "line": "attack"
+    },
+    "905": {
+      "role": "LCM",
+      "line": "midfield"
+    },
+    "914": {
+      "role": "DEF1",
+      "line": "midfield"
+    },
+    "925": {
+      "role": "DEF2",
+      "line": "midfield"
+    },
+    "919": {
+      "role": "FWD6",
+      "line": "defense"
+    },
+    "922": {
+      "role": "FWD8",
+      "line": "midfield"
+    },
+    "896": {
+      "role": "FWD10",
+      "line": "midfield"
+    },
+    "924": {
+      "role": "LM",
+      "line": "midfield"
+    },
+    "929": {
+      "role": "LCM",
+      "line": "midfield"
+    },
+    "927": {
+      "role": "DEF3",
+      "line": "midfield"
+    },
+    "908": {
+      "role": "DEF6",
+      "line": "defense"
+    },
+    "933": {
+      "role": "RCM",
+      "line": "midfield"
+    },
+    "913": {
+      "role": "DEF9",
+      "line": "defense"
+    },
+    "907": {
+      "role": "ST",
+      "line": "attack"
+    },
+    "937": {
+      "role": "DEF1",
+      "line": "defense"
+    },
+    "939": {
+      "role": "FWD7",
+      "line": "defense"
+    },
+    "943": {
+      "role": "RCM",
+      "line": "attack"
+    },
+    "945": {
+      "role": "DEF7",
+      "line": "defense"
+    },
+    "949": {
+      "role": "RM",
+      "line": "midfield"
+    },
+    "950": {
+      "role": "DEF7",
+      "line": "defense"
+    },
+    "951": {
+      "role": "DEF13",
+      "line": "defense"
+    },
+    "956": {
+      "role": "ST",
+      "line": "attack"
+    },
+    "948": {
+      "role": "DEF5",
+      "line": "midfield"
+    },
+    "954": {
+      "role": "DEF9",
+      "line": "defense"
+    },
+    "959": {
+      "role": "FWD1",
+      "line": "attack"
+    },
+    "961": {
+      "role": "DEF5",
+      "line": "defense"
+    },
+    "962": {
+      "role": "MID3",
+      "line": "midfield"
+    },
+    "965": {
+      "role": "FWD6",
+      "line": "attack"
+    },
+    "966": {
+      "role": "FWD3",
+      "line": "attack"
+    },
+    "967": {
+      "role": "DEF8",
+      "line": "defense"
+    },
+    "968": {
+      "role": "DEF10",
+      "line": "defense"
+    },
+    "969": {
+      "role": "FWD8",
+      "line": "attack"
+    },
+    "970": {
+      "role": "MID3",
+      "line": "midfield"
+    },
+    "971": {
+      "role": "DEF2",
+      "line": "defense"
+    },
+    "974": {
+      "role": "MID1",
+      "line": "midfield"
+    },
+    "977": {
+      "role": "FWD4",
+      "line": "attack"
+    },
+    "980": {
+      "role": "FWD1",
+      "line": "attack"
+    },
+    "982": {
+      "role": "RCM",
+      "line": "midfield"
+    },
+    "986": {
+      "role": "CB",
+      "line": "defense"
+    },
+    "985": {
+      "role": "FWD3",
+      "line": "attack"
+    }
+  },
+  "_cache_key": {
+    "checkpoint_fracs": [
+      1.0
+    ]
+  }
+}
