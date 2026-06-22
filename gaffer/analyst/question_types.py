@@ -109,6 +109,12 @@ _UNSUPPORTED_PATTERNS: dict[str, str] = {
     "completion rate": "Gaffer only logs completed passes via possession-transfer detection -- there's no attempted-but-failed-pass concept, so accuracy/completion rate can't be computed",
     "best player":     "player ranking here is hub centrality (how connected a player is in the passing network), not a skill or quality rating",
     "greatest player": "player ranking here is hub centrality (how connected a player is in the passing network), not a skill or quality rating",
+    "goals":           "Gaffer's detection layer doesn't track goals -- there's no shot or scoring-event concept anywhere in the pipeline",
+    "a goal":          "Gaffer's detection layer doesn't track goals -- there's no shot or scoring-event concept anywhere in the pipeline",
+    "scored":          "Gaffer's detection layer doesn't track goals -- there's no shot or scoring-event concept anywhere in the pipeline",
+    "shot":            "Gaffer's detection layer doesn't track shots -- ball events only cover passes, possession changes, and pitch-position analytics",
+    "win probability": "Gaffer has no outcome-prediction model -- it only reports what was observed, not a forecast of the result",
+    "chance of winning": "Gaffer has no outcome-prediction model -- it only reports what was observed, not a forecast of the result",
 }
 
 

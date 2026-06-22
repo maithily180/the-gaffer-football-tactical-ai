@@ -73,14 +73,40 @@ def _retrieve_dominance(bundle: MatchBundle, team: str | None) -> dict:
         if ep.team in teams and ep.outcome in _SUPPORTING_OUTCOMES
     ]
     supporting.sort(key=lambda ep: len(ep.events), reverse=True)
+    sc = bundle.match_report.space_control_pct
 
-    return {
+    result = {
         "overload_counts":   overload,
         "line_break_counts": line_break,
         "dominance_counts":  dominance,
-        "space_control_pct": bundle.match_report.space_control_pct,
+        "space_control_pct": sc,
         "supporting_episodes": supporting[:3],
     }
+
+    # The question may presuppose a team "dominated" that the comparison
+    # metrics don't actually back -- e.g. "why did Team B dominate?" asked
+    # about a clip where Team A leads overloads, line breaks, AND space
+    # control. Surface that mismatch explicitly instead of letting the LLM
+    # answer a premise the evidence contradicts.
+    if team is not None:
+        other = "teamB" if team == "teamA" else "teamA"
+        team_idx, other_idx = (0, 1) if team == "teamA" else (1, 0)
+        team_leads = sum([
+            overload[team] > overload[other],
+            line_break[team] > line_break[other],
+            sc[team_idx] > sc[other_idx],
+        ])
+        if team_leads < 2:
+            label = {"teamA": "Team A", "teamB": "Team B"}
+            result["premise_mismatch"] = (
+                f"the evidence does not support that {label[team]} dominated -- "
+                f"{label[other]} led on {3 - team_leads} of 3 comparison metrics "
+                f"(overloads {overload[other]} vs {overload[team]}, "
+                f"line breaks {line_break[other]} vs {line_break[team]}, "
+                f"space control {sc[other_idx]:.0f}% vs {sc[team_idx]:.0f}%)"
+            )
+
+    return result
 
 
 def _retrieve_event_search(bundle: MatchBundle, team: str | None, event_type: str | None) -> dict:

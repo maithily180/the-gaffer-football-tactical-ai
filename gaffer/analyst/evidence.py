@@ -102,7 +102,10 @@ def _build_match_summary(r: dict) -> list[Evidence]:
 def _build_dominance(r: dict) -> list[Evidence]:
     oc, lb, dc = r["overload_counts"], r["line_break_counts"], r["dominance_counts"]
     sc = r["space_control_pct"]
-    ev = [
+    ev = []
+    if r.get("premise_mismatch"):
+        ev.append(Evidence("Premise check", r["premise_mismatch"], "retrieval.premise_check"))
+    ev += [
         Evidence("Overloads",         f"Team A {oc['teamA']} - Team B {oc['teamB']}", "events.overload (by team)"),
         Evidence("Line breaks",       f"Team A {lb['teamA']} - Team B {lb['teamB']}", "events.line_break (by team)"),
         Evidence("Dominance periods", f"Team A {dc['teamA']} - Team B {dc['teamB']}", "events.dominance (by team)"),
