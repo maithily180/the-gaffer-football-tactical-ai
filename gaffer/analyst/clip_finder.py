@@ -117,6 +117,18 @@ def find_clip_reference(bundle: MatchBundle, query: str) -> ClipReference | None
     return _reference_for_event(bundle, matches[0], suffix)
 
 
+def _clamped_window(loader: VideoLoader, start_s: float, end_s: float,
+                     pad_s: float) -> tuple[float, float, int, int]:
+    """(start_s, end_s) padded by pad_s and clamped to the clip's bounds ->
+    (s, e, start_frame, n_frames). Shared by export_clip and highlight_reel
+    so the float-seconds-to-frame-range math only lives in one place."""
+    s = max(0.0, start_s - pad_s)
+    e = min(loader.duration_s, end_s + pad_s)
+    start_frame = int(s * loader.fps)
+    n_frames = max(1, int(round((e - s) * loader.fps)))
+    return s, e, start_frame, n_frames
+
+
 def export_clip(clip_path: str | Path, start_s: float, end_s: float, *,
                  pad_s: float = 2.0,
                  out_dir: Path = config.OUTPUTS_DIR / "clips") -> Path:
@@ -124,10 +136,7 @@ def export_clip(clip_path: str | Path, start_s: float, end_s: float, *,
     out of clip_path and write it to out_dir. Reuses the same VideoLoader/
     VideoWriter pattern every other render script in gaffer/video uses."""
     with VideoLoader(clip_path) as loader:
-        s = max(0.0, start_s - pad_s)
-        e = min(loader.duration_s, end_s + pad_s)
-        start_frame = int(s * loader.fps)
-        n_frames = max(1, int(round((e - s) * loader.fps)))
+        s, e, start_frame, n_frames = _clamped_window(loader, start_s, end_s, pad_s)
         out_path = out_dir / f"{Path(clip_path).stem}_{s:.1f}-{e:.1f}.mp4"
         with VideoWriter(out_path, fps=loader.fps, width=loader.width, height=loader.height) as writer:
             for _, frame in loader.frames(start=start_frame, count=n_frames):
