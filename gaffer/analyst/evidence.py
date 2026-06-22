@@ -126,6 +126,23 @@ def _build_event_search(r: dict) -> list[Evidence]:
     return ev
 
 
+def _build_time_window(r: dict) -> list[Evidence]:
+    start_s, end_s = r["window"]
+    ev = [Evidence("Time window", f"{start_s:.1f}s - {end_s:.1f}s", "retrieval.window")]
+    events = r["events"]
+    for e in events[:15]:
+        ev.append(Evidence(f"{e.event_type} @ {e.time_s:.1f}s", e.label(), "events"))
+    if len(events) > 15:
+        ev.append(Evidence("Note", f"showing the first 15 of {len(events)} events in this window, sorted by time",
+                            "evidence.truncation"))
+    for ep in r["episodes"][:5]:
+        ev.append(Evidence("Episode",
+                            f"{ep.team}: {ep.narrative()} ({ep.outcome}, "
+                            f"{ep.start_time_s:.1f}s-{ep.end_time_s:.1f}s)",
+                            "episodes"))
+    return ev
+
+
 def _build_player_influence(r: dict) -> list[Evidence]:
     ev = []
     for h in r["hub_players"]:
@@ -158,4 +175,5 @@ _BUILDERS = {
     QuestionType.EVENT_SEARCH:           _build_event_search,
     QuestionType.PLAYER_INFLUENCE:       _build_player_influence,
     QuestionType.PASSING_ANALYSIS:       _build_passing,
+    QuestionType.TIME_WINDOW:            _build_time_window,
 }

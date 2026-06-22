@@ -26,6 +26,7 @@ from __future__ import annotations
 
 from enum import Enum
 
+from gaffer.analyst.time_parse import find_time_window
 from gaffer.events.base import (
     COMPACT_BLOCK,
     COUNTER_ATTACK,
@@ -47,6 +48,7 @@ class QuestionType(Enum):
     EVENT_SEARCH = "event_search"
     PLAYER_INFLUENCE = "player_influence"
     PASSING_ANALYSIS = "passing_analysis"
+    TIME_WINDOW = "time_window"
     UNSUPPORTED = "unsupported"
 
 
@@ -134,6 +136,9 @@ def classify(question: str) -> tuple[QuestionType, str | None, str | None]:
     unsupported_reason = _find_unsupported_reason(q)
     if unsupported_reason is not None:
         return QuestionType.UNSUPPORTED, team, unsupported_reason
+
+    if find_time_window(q) is not None:
+        return QuestionType.TIME_WINDOW, team, None
 
     if "domina" in q:
         return QuestionType.DOMINANCE_EXPLANATION, team, None

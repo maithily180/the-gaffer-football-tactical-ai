@@ -19,6 +19,7 @@ from __future__ import annotations
 
 from gaffer.analyst.match_bundle import MatchBundle
 from gaffer.analyst.question_types import QuestionType
+from gaffer.analyst.time_parse import find_time_window
 from gaffer.analytics.episodes import Episode
 from gaffer.events.base import DOMINANCE, LINE_BREAK, OVERLOAD, PASS, FootballEvent
 
@@ -26,7 +27,8 @@ _SUPPORTING_OUTCOMES = {"Counter", "Line Break", "Attacking Third Entry"}
 
 
 def retrieve(bundle: MatchBundle, qtype: QuestionType, *,
-             team: str | None = None, event_type: str | None = None) -> dict:
+             team: str | None = None, event_type: str | None = None,
+             question: str | None = None) -> dict:
     if qtype is QuestionType.UNSUPPORTED:
         # classify() passes the human-readable reason through the event_type
         # slot for this one question type -- see question_types.py docstring.
@@ -39,6 +41,8 @@ def retrieve(bundle: MatchBundle, qtype: QuestionType, *,
         return _retrieve_event_search(bundle, team, event_type)
     if qtype is QuestionType.PLAYER_INFLUENCE:
         return _retrieve_player_influence(bundle)
+    if qtype is QuestionType.TIME_WINDOW:
+        return _retrieve_time_window(bundle, question or "")
     return _retrieve_passing(bundle, team)
 
 
@@ -140,6 +144,31 @@ def _retrieve_player_influence(bundle: MatchBundle) -> dict:
     return {
         "hub_players": pnr.hub_players,
         "progressive_leaders": pnr.progressive_leaders,
+    }
+
+
+def _retrieve_time_window(bundle: MatchBundle, question: str) -> dict:
+    window = find_time_window(question)
+    if window is None:
+        return {"empty": True, "reason": "couldn't find a specific time in the question"}
+    start_s, end_s = window
+
+    events = sorted(
+        (e for e in bundle.run.events if start_s <= e.time_s <= end_s),
+        key=lambda e: e.time_s,
+    )
+    episodes = [
+        ep for ep in bundle.run.episodes
+        if ep.start_time_s <= end_s and ep.end_time_s >= start_s
+    ]
+    if not events and not episodes:
+        return {"empty": True,
+                "reason": f"no events or episodes were recorded between {start_s:.1f}s and {end_s:.1f}s"}
+
+    return {
+        "window": (start_s, end_s),
+        "events": events,
+        "episodes": episodes,
     }
 
 

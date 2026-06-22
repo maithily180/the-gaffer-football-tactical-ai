@@ -36,6 +36,7 @@ _PROMPT_FILES = {
     QuestionType.EVENT_SEARCH:          "event_search.txt",
     QuestionType.PLAYER_INFLUENCE:      "player_influence.txt",
     QuestionType.PASSING_ANALYSIS:      "passing_analysis.txt",
+    QuestionType.TIME_WINDOW:           "time_window.txt",
 }
 
 

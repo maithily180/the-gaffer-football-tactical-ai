@@ -18,6 +18,6 @@ from gaffer.analyst.retrieval import retrieve
 
 def ask(bundle: MatchBundle, question: str) -> str:
     qtype, team, event_type = classify(question)
-    retrieved = retrieve(bundle, qtype, team=team, event_type=event_type)
+    retrieved = retrieve(bundle, qtype, team=team, event_type=event_type, question=question)
     pack = build_evidence(question, qtype, retrieved)
     return generate_answer(question, qtype, pack)
