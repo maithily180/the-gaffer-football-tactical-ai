@@ -9,7 +9,8 @@ Detected events
 ───────────────
   possession_change    owner transitions between teamA ↔ teamB
   possession_recovery  team regains ball within RECOVERY_WINDOW_S after losing it
-  counter_attack       recovery + ball advances ≥ COUNTER_FWD_M toward goal
+  counter_attack       recovery + ball advances ≥ COUNTER_FWD_M toward goal,
+                       landing outside the recovering team's attacking third
   high_press           press intensity ≥ threshold for HIGH_PRESS_MIN_FRAMES frames (onset)
   high_press_ended     press intensity drops below threshold (offset)
   line_break           ball x-coord crosses the defending team's backline
@@ -58,6 +59,7 @@ _HIGH_PRESS_MIN_FRAMES = 2           # detection frames at intensity≥threshold
 _RECOVERY_WINDOW_S     = 4.0         # seconds: if you regain possession this soon it's a recovery
 _COUNTER_FWD_M         = 6.0         # metres ball must advance toward goal (within 3s) → counter
 _COUNTER_WINDOW_S      = 3.0
+_N_THIRDS              = 3           # matches overload.py / episodes.py's zone grid
 _SPRINT_THRESHOLD_MS   = config.SPRINT_THRESHOLD_MS  # 7.0 m/s
 _SPRINT_MIN_FRAMES     = config.SPRINT_MIN_FRAMES     # 3 consecutive frames
 _COMPACT_WIDTH_M       = 35.0        # metres
@@ -197,7 +199,16 @@ class EventDetector:
         time_s: float,
         loc: tuple[float, float] | None,
     ) -> list[FootballEvent]:
-        """Ball moved ≥ COUNTER_FWD_M toward goal within COUNTER_WINDOW_S."""
+        """Ball moved ≥ COUNTER_FWD_M toward goal within COUNTER_WINDOW_S,
+        landing outside the recovering team's own attacking third. Guards
+        against a goalmouth scramble (recovery + bounce already inside the
+        box) satisfying the same forward-progress threshold as a real
+        coast-to-coast transition -- a real failure mode in principle, though
+        not the explanation for the one case checked by hand this session
+        (arsenal_newcastle_highlights episode #4: tracked ball_x stayed in
+        the middle third throughout, 57m->64m of 105m, despite the broadcast
+        framing visually suggesting it was already near the box -- camera
+        zoom is not a reliable proxy for pitch position on this clip)."""
         if not self._ball_hist:
             return []
         # Attack direction for the recovering team
@@ -215,6 +226,11 @@ class EventDetector:
                 oldest = (bx, by)
                 break
         if oldest is None or snap.ball_xy is None:
+            return []
+
+        third_w = config.PITCH_LENGTH_M / _N_THIRDS
+        ti = min(max(int(snap.ball_xy[0] // third_w), 0), _N_THIRDS - 1)
+        if third_label(ti, attack_dir) == "attacking":
             return []
 
         fwd = (snap.ball_xy[0] - oldest[0]) * attack_dir

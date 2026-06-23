@@ -198,7 +198,7 @@ REPORT_MAX_TOKENS = 400
 OUTPUT_VIDEO_WIDTH = 1280          # write at 720p-equivalent width
 OUTPUT_VIDEO_HEIGHT = 720
 OUTPUT_VIDEO_FPS = 25
-OUTPUT_VIDEO_CODEC = "mp4v"
+OUTPUT_VIDEO_CODEC = "avc1"        # H.264 -- mp4v isn't decodable by browsers' inline <video>
 
 MINIMAP_WIDTH = 300
 MINIMAP_HEIGHT = 200
