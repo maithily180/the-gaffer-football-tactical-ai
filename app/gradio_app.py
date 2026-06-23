@@ -34,6 +34,7 @@ from gaffer import config
 from gaffer.analyst import explorer_data as ed
 from gaffer.analyst.clip_finder import export_clip
 from gaffer.analyst.commentary import commentate_episode
+from gaffer.analyst.commentary_video import build_commentary_video
 from gaffer.analyst.highlight_reel import render_highlight_reel
 from gaffer.analyst.match_bundle import build_bundle
 from gaffer.analyst.query_engine import ask
@@ -79,6 +80,15 @@ def on_generate_reel(bundle, clip_path: str | None):
     if bundle is None or clip_path is None:
         return None
     return _fresh_url(render_highlight_reel(bundle, clip_path))
+
+
+def on_commentary_video(bundle, clip_path: str | None):
+    if bundle is None or clip_path is None:
+        return None
+    clip = Path(clip_path)
+    calib = config.DATA_DIR / "calibration" / f"{clip.stem}.json"
+    out = build_commentary_video(clip, calib, use_llm=True, notable_only=True)
+    return _fresh_url(out)
 
 
 def on_select_episode(evt: gr.SelectData, bundle, episode_ids):
@@ -140,6 +150,10 @@ with gr.Blocks(title="Gaffer -- Match Explorer") as demo:
             timeline_img = gr.Image(label="Timeline", interactive=False)
             reel_btn = gr.Button("Generate Highlight Reel")
             reel_video = gr.Video(label="Highlight Reel")
+            gr.Markdown("**Commentary video** -- bird's-eye minimap + timed subtitles + spoken narration. "
+                        "Runs the full perception pass, so it takes a few minutes.")
+            commentary_video_btn = gr.Button("Generate Commentary Video", variant="primary")
+            commentary_video_out = gr.Video(label="Commentary Video (download from the player)")
 
         with gr.Tab("Episode Explorer"):
             with gr.Row():
@@ -167,6 +181,7 @@ with gr.Blocks(title="Gaffer -- Match Explorer") as demo:
         outputs=[bundle_state, clip_path_state, episode_ids_state, report_tb, episodes_df, timeline_img],
     )
     reel_btn.click(fn=on_generate_reel, inputs=[bundle_state, clip_path_state], outputs=[reel_video])
+    commentary_video_btn.click(fn=on_commentary_video, inputs=[bundle_state, clip_path_state], outputs=[commentary_video_out])
     episodes_df.select(
         fn=on_select_episode, inputs=[bundle_state, episode_ids_state],
         outputs=[selected_episode_state, detail_md, evidence_md, preceding_md, commentary_md, flowing_md],

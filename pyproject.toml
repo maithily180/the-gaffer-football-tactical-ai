@@ -23,6 +23,8 @@ dependencies = [
     "jupyter>=1.1.1",
     "nbconvert>=7.17.1",
     "trackers>=2.4.0",
+    "pyttsx3>=2.99",          # offline TTS (Windows SAPI5) for commentary audio
+    "imageio-ffmpeg>=0.6.0",  # bundled static ffmpeg binary -- mux commentary audio onto video
 ]
 
 [project.optional-dependencies]
