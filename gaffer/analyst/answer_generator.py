@@ -40,11 +40,18 @@ _PROMPT_FILES = {
 }
 
 
+def chat(prompt: str, *, model: str = _MODEL) -> str:
+    """Single grounded entry point for the local LLM call -- keeps the
+    OLLAMA_HOST loopback workaround (above) in exactly one place, so every
+    caller (query answers, commentary, ...) shares it."""
+    response = _CLIENT.chat(model=model, messages=[{"role": "user", "content": prompt}])
+    return response["message"]["content"].strip()
+
+
 def generate_answer(question: str, qtype: QuestionType, pack: EvidencePack) -> str:
     if pack.empty:
         return f"No evidence found for this question -- {pack.empty_reason}."
 
     template = (_PROMPTS_DIR / _PROMPT_FILES[qtype]).read_text(encoding="utf-8")
     prompt = template.format(question=question, evidence=pack.render_for_prompt())
-    response = _CLIENT.chat(model=_MODEL, messages=[{"role": "user", "content": prompt}])
-    return response["message"]["content"].strip()
+    return chat(prompt)

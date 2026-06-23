@@ -33,6 +33,7 @@ import gradio as gr
 from gaffer import config
 from gaffer.analyst import explorer_data as ed
 from gaffer.analyst.clip_finder import export_clip
+from gaffer.analyst.commentary import commentate_episode
 from gaffer.analyst.highlight_reel import render_highlight_reel
 from gaffer.analyst.match_bundle import build_bundle
 from gaffer.analyst.query_engine import ask
@@ -82,7 +83,7 @@ def on_generate_reel(bundle, clip_path: str | None):
 
 def on_select_episode(evt: gr.SelectData, bundle, episode_ids):
     if bundle is None or not episode_ids:
-        return None, "Load a match first.", "", ""
+        return None, "Load a match first.", "", "", "", ""
     episode_id = episode_ids[evt.index[0]]
     ep = ed.find_episode(bundle, episode_id)
     tlabel = "Team A" if ep.team == "teamA" else "Team B"
@@ -92,7 +93,18 @@ def on_select_episode(evt: gr.SelectData, bundle, episode_ids):
               f"{ed.explain_outcome(ep)}")
     evidence = "\n".join(f"- {line}" for line in ed.evidence_lines(ep)) or "*(no highlight events recorded on this episode)*"
     preceding = ed.preceding_episode_summary(bundle, episode_id)
-    return episode_id, detail, evidence, preceding
+    # Deterministic commentary is instant and strictly grounded -- show it
+    # inline. The flowing LLM version is opt-in (button below) since it costs
+    # an Ollama call and takes phrasing liberties.
+    grounded = commentate_episode(ep, use_llm=False)
+    return episode_id, detail, evidence, preceding, grounded, ""
+
+
+def on_flowing_commentary(bundle, episode_id: int | None):
+    if bundle is None or episode_id is None:
+        return "Select an episode first."
+    ep = ed.find_episode(bundle, episode_id)
+    return commentate_episode(ep, use_llm=True)
 
 
 def on_watch_clip(bundle, clip_path: str | None, episode_id: int | None):
@@ -136,6 +148,10 @@ with gr.Blocks(title="Gaffer -- Match Explorer") as demo:
                 with gr.Column(scale=1):
                     detail_md = gr.Markdown("Select an episode above.")
                     evidence_md = gr.Markdown()
+                    gr.Markdown("**Commentary (grounded):**")
+                    commentary_md = gr.Markdown()
+                    flowing_btn = gr.Button("Flowing commentary (AI)")
+                    flowing_md = gr.Markdown()
                     gr.Markdown("**Preceding possession:**")
                     preceding_md = gr.Markdown()
                     watch_btn = gr.Button("Watch Clip")
@@ -153,8 +169,9 @@ with gr.Blocks(title="Gaffer -- Match Explorer") as demo:
     reel_btn.click(fn=on_generate_reel, inputs=[bundle_state, clip_path_state], outputs=[reel_video])
     episodes_df.select(
         fn=on_select_episode, inputs=[bundle_state, episode_ids_state],
-        outputs=[selected_episode_state, detail_md, evidence_md, preceding_md],
+        outputs=[selected_episode_state, detail_md, evidence_md, preceding_md, commentary_md, flowing_md],
     )
+    flowing_btn.click(fn=on_flowing_commentary, inputs=[bundle_state, selected_episode_state], outputs=[flowing_md])
     watch_btn.click(fn=on_watch_clip, inputs=[bundle_state, clip_path_state, selected_episode_state], outputs=[episode_video])
     ask_btn.click(fn=on_ask, inputs=[bundle_state, question_tb], outputs=[answer_md])
 
