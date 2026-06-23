@@ -21,7 +21,9 @@ Usage:
 
 from __future__ import annotations
 
+import shutil
 import sys
+import uuid
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -36,7 +38,25 @@ from gaffer.analyst.match_bundle import build_bundle
 from gaffer.analyst.query_engine import ask
 
 _EXPLORER_DIR = config.OUTPUTS_DIR / "explorer"
+_PLAYBACK_DIR = _EXPLORER_DIR / "playback"
 _EPISODE_HEADERS = ["ID", "Team", "Start", "End", "Duration", "Outcome", "Narrative"]
+
+
+def _fresh_url(path) -> str | None:
+    """Copy a generated video to a uniquely-named file before handing it to
+    gr.Video. clip_finder/highlight_reel name their outputs deterministically
+    (same episode -> same filename), so without this the browser re-requests an
+    identical URL on every click and serves the *cached* bytes from a previous
+    click -- which is exactly how a freshly-fixed video kept showing the old
+    broken one ("0:00 / NaN:NaN"). A unique name per click guarantees a fresh
+    URL, so the browser can never show a stale copy."""
+    if path is None:
+        return None
+    src = Path(path)
+    _PLAYBACK_DIR.mkdir(parents=True, exist_ok=True)
+    dst = _PLAYBACK_DIR / f"{src.stem}_{uuid.uuid4().hex[:8]}{src.suffix}"
+    shutil.copyfile(src, dst)
+    return str(dst)
 
 
 def _no_match_loaded():
@@ -57,7 +77,7 @@ def on_load(clip_stem: str | None):
 def on_generate_reel(bundle, clip_path: str | None):
     if bundle is None or clip_path is None:
         return None
-    return render_highlight_reel(bundle, clip_path)
+    return _fresh_url(render_highlight_reel(bundle, clip_path))
 
 
 def on_select_episode(evt: gr.SelectData, bundle, episode_ids):
@@ -79,7 +99,7 @@ def on_watch_clip(bundle, clip_path: str | None, episode_id: int | None):
     if bundle is None or clip_path is None or episode_id is None:
         return None
     ep = ed.find_episode(bundle, episode_id)
-    return str(export_clip(clip_path, ep.start_time_s, ep.end_time_s))
+    return _fresh_url(export_clip(clip_path, ep.start_time_s, ep.end_time_s))
 
 
 def on_ask(bundle, question: str):
