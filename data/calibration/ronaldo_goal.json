@@ -1,0 +1,70 @@
+{
+  "clip": "ronaldo_goal.mp4",
+  "frame_idx": 300,
+  "fps": 30.0,
+  "image_points": {
+    "left_penalty_spot": [
+      341,
+      157
+    ],
+    "left_penalty_box_tr": [
+      638,
+      103
+    ],
+    "left_penalty_box_br": [
+      164,
+      269
+    ],
+    "left_six_yard_tr": [
+      341,
+      115
+    ],
+    "left_six_yard_br": [
+      115,
+      177
+    ],
+    "left_arc_apex": [
+      535,
+      175
+    ],
+    "left_penalty_box_tl": [
+      368,
+      81
+    ],
+    "left_six_yard_tl": [
+      256,
+      108
+    ],
+    "left_six_yard_bl": [
+      17,
+      164
+    ],
+    "left_corner_top": [
+      477,
+      54
+    ],
+    "left_goal_center": [
+      149,
+      133
+    ]
+  },
+  "homography": [
+    [
+      0.07829433927356692,
+      0.3252857333038286,
+      -54.91405704489503
+    ],
+    [
+      -0.041548383165265566,
+      0.6291856212795782,
+      -14.199033818420606
+    ],
+    [
+      0.00012213575884589844,
+      0.0063847176452787886,
+      1.0
+    ]
+  ],
+  "reprojection_mean_px": 1.8505338325029173,
+  "reprojection_max_px": 4.799404266470151
+}

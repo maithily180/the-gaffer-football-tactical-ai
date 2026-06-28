@@ -166,13 +166,17 @@ def build_commentary_video(clip_path, calib_path, *, use_llm: bool = True,
     minimap = MinimapRenderer(mgr)
     propagator = HomographyPropagator(mgr)
 
+    # Size the minimap to the frame, not a fixed pixel width -- the default
+    # 300px is a small inset on a 1280px clip but eats half a 640px one.
+    mini_w = max(160, int(loader.width * 0.24))
+
     base = work / "base.mp4"
     log(f"Rendering {n_total} frames with minimap + subtitles...")
     with VideoWriter(base, fps=fps, width=loader.width, height=loader.height) as writer:
         for fidx, frame in loader.frames(start=0, count=n_total):
             dets = assigner.assign(frame, detector.detect(frame, fidx))
             propagator.update(frame, exclude_dets=dets)
-            out = minimap.composite(frame, dets)
+            out = minimap.composite(frame, dets, width=mini_w)
             t = fidx / fps
             active = next((txt for (s, e, txt) in segments if s <= t < e), None)
             if active:

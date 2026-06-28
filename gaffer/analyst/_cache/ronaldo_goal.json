@@ -1,0 +1,669 @@
+{
+  "clip_name": "ronaldo_goal",
+  "duration_s": 26.3,
+  "events": [
+    {
+      "event_type": "line_break",
+      "team": "teamB",
+      "time_s": 0.4,
+      "data": {
+        "def_team": "teamA",
+        "def_line_x": 7.6
+      }
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 0.6,
+      "data": {
+        "from": "teamB",
+        "to": "teamA"
+      }
+    },
+    {
+      "event_type": "compact_block",
+      "team": "teamA",
+      "time_s": 0.6,
+      "data": {
+        "width_m": 27.2,
+        "area_m2": 230.0
+      }
+    },
+    {
+      "event_type": "compact_block",
+      "team": "teamB",
+      "time_s": 0.9,
+      "data": {
+        "width_m": 32.4,
+        "area_m2": 410.0
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamA",
+      "time_s": 1.8,
+      "data": {
+        "lane": "right_half_space",
+        "third": "attacking",
+        "count_for": 3,
+        "count_against": 1,
+        "space_control_pct": 80.4
+      }
+    },
+    {
+      "event_type": "compact_block",
+      "team": "teamA",
+      "time_s": 3.9,
+      "data": {
+        "width_m": 23.6,
+        "area_m2": 162.0
+      }
+    },
+    {
+      "event_type": "compact_block",
+      "team": "teamB",
+      "time_s": 3.9,
+      "data": {
+        "width_m": 31.8,
+        "area_m2": 173.0
+      }
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 4.2,
+      "data": {
+        "from": "teamA",
+        "to": "teamB"
+      }
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamB",
+      "time_s": 4.2,
+      "data": {
+        "seconds_ago": 3.6
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 4.3,
+      "data": {
+        "track_id": 27,
+        "speed_ms": 10.5
+      }
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 4.6,
+      "data": {
+        "def_team": "teamB",
+        "def_line_x": 13.5
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 5.0,
+      "data": {
+        "lane": "right_wing",
+        "third": "attacking",
+        "count_for": 7,
+        "count_against": 3,
+        "space_control_pct": 49.9
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 5.4,
+      "data": {
+        "track_id": 53,
+        "speed_ms": 9.8
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 5.5,
+      "data": {
+        "track_id": 55,
+        "speed_ms": 12.5
+      }
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 5.6,
+      "data": {
+        "def_team": "teamB",
+        "def_line_x": 13.5
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 5.6,
+      "data": {
+        "lane": "right_wing",
+        "third": "attacking",
+        "count_for": 6,
+        "count_against": 1,
+        "space_control_pct": 74.4
+      }
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 5.7,
+      "data": {
+        "from": "teamB",
+        "to": "teamA"
+      }
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamA",
+      "time_s": 5.7,
+      "data": {
+        "seconds_ago": 1.5
+      }
+    },
+    {
+      "event_type": "high_press",
+      "team": "teamB",
+      "time_s": 5.8,
+      "data": {
+        "intensity": 5
+      }
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 6.1,
+      "data": {
+        "from": "teamA",
+        "to": "teamB"
+      }
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamB",
+      "time_s": 6.1,
+      "data": {
+        "seconds_ago": 0.4
+      }
+    },
+    {
+      "event_type": "high_press_ended",
+      "team": "teamA",
+      "time_s": 6.1,
+      "data": {
+        "peak_streak": 4
+      }
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 6.1,
+      "data": {
+        "def_team": "teamB",
+        "def_line_x": 13.1
+      }
+    },
+    {
+      "event_type": "sprint_start",
+      "team": null,
+      "time_s": 6.4,
+      "data": {
+        "track_id": 63,
+        "speed_ms": 7.4
+      }
+    },
+    {
+      "event_type": "compact_block",
+      "team": "teamB",
+      "time_s": 6.4,
+      "data": {
+        "width_m": 24.0,
+        "area_m2": 83.0
+      }
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamB",
+      "time_s": 6.7,
+      "data": {
+        "def_team": "teamA",
+        "def_line_x": 12.4
+      }
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamB",
+      "time_s": 7.0,
+      "data": {
+        "def_team": "teamA",
+        "def_line_x": 12.9
+      }
+    },
+    {
+      "event_type": "compact_block",
+      "team": "teamB",
+      "time_s": 7.0,
+      "data": {
+        "width_m": 11.7,
+        "area_m2": 87.0
+      }
+    },
+    {
+      "event_type": "overload",
+      "team": "teamB",
+      "time_s": 7.1,
+      "data": {
+        "lane": "right_wing",
+        "third": "attacking",
+        "count_for": 5,
+        "count_against": 2,
+        "space_control_pct": 85.8
+      }
+    },
+    {
+      "event_type": "line_break",
+      "team": "teamA",
+      "time_s": 8.2,
+      "data": {
+        "def_team": "teamB",
+        "def_line_x": 6.4
+      }
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamA",
+      "time_s": 8.5,
+      "data": {
+        "from": "teamB",
+        "to": "teamA"
+      }
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamA",
+      "time_s": 8.5,
+      "data": {
+        "seconds_ago": 2.4
+      }
+    },
+    {
+      "event_type": "high_press",
+      "team": "teamB",
+      "time_s": 8.8,
+      "data": {
+        "intensity": 3
+      }
+    },
+    {
+      "event_type": "possession_change",
+      "team": "teamB",
+      "time_s": 8.9,
+      "data": {
+        "from": "teamA",
+        "to": "teamB"
+      }
+    },
+    {
+      "event_type": "possession_recovery",
+      "team": "teamB",
+      "time_s": 8.9,
+      "data": {
+        "seconds_ago": 0.4
+      }
+    },
+    {
+      "event_type": "high_press_ended",
+      "team": "teamA",
+      "time_s": 8.9,
+      "data": {
+        "peak_streak": 2
+      }
+    },
+    {
+      "event_type": "pass",
+      "team": "teamB",
+      "time_s": 12.9,
+      "data": {
+        "sender_id": 100,
+        "receiver_id": 112,
+        "distance_m": 5.5,
+        "duration_s": 3.6,
+        "speed_ms": 1.5,
+        "direction": "backward"
+      }
+    }
+  ],
+  "episodes": [
+    {
+      "episode_id": 1,
+      "team": "teamB",
+      "start_time_s": 0.0,
+      "end_time_s": 0.6,
+      "outcome": "Line Break",
+      "distance_advanced_m": 9.3,
+      "possession_chain": [],
+      "players": [],
+      "events": [
+        {
+          "event_type": "line_break",
+          "team": "teamB",
+          "time_s": 0.4,
+          "data": {
+            "def_team": "teamA",
+            "def_line_x": 7.6
+          }
+        }
+      ]
+    },
+    {
+      "episode_id": 2,
+      "team": "teamA",
+      "start_time_s": 0.6,
+      "end_time_s": 4.2,
+      "outcome": "Lost Possession",
+      "distance_advanced_m": null,
+      "possession_chain": [],
+      "players": [],
+      "events": [
+        {
+          "event_type": "possession_change",
+          "team": "teamA",
+          "time_s": 0.6,
+          "data": {
+            "from": "teamB",
+            "to": "teamA"
+          }
+        },
+        {
+          "event_type": "compact_block",
+          "team": "teamA",
+          "time_s": 0.6,
+          "data": {
+            "width_m": 27.2,
+            "area_m2": 230.0
+          }
+        },
+        {
+          "event_type": "overload",
+          "team": "teamA",
+          "time_s": 1.8,
+          "data": {
+            "lane": "right_half_space",
+            "third": "attacking",
+            "count_for": 3,
+            "count_against": 1,
+            "space_control_pct": 80.4
+          }
+        },
+        {
+          "event_type": "compact_block",
+          "team": "teamA",
+          "time_s": 3.9,
+          "data": {
+            "width_m": 23.6,
+            "area_m2": 162.0
+          }
+        }
+      ]
+    },
+    {
+      "episode_id": 3,
+      "team": "teamB",
+      "start_time_s": 4.2,
+      "end_time_s": 5.7,
+      "outcome": "Attacking Third Entry",
+      "distance_advanced_m": 7.4,
+      "possession_chain": [],
+      "players": [],
+      "events": [
+        {
+          "event_type": "possession_change",
+          "team": "teamB",
+          "time_s": 4.2,
+          "data": {
+            "from": "teamA",
+            "to": "teamB"
+          }
+        },
+        {
+          "event_type": "possession_recovery",
+          "team": "teamB",
+          "time_s": 4.2,
+          "data": {
+            "seconds_ago": 3.6
+          }
+        },
+        {
+          "event_type": "overload",
+          "team": "teamB",
+          "time_s": 5.0,
+          "data": {
+            "lane": "right_wing",
+            "third": "attacking",
+            "count_for": 7,
+            "count_against": 3,
+            "space_control_pct": 49.9
+          }
+        },
+        {
+          "event_type": "overload",
+          "team": "teamB",
+          "time_s": 5.6,
+          "data": {
+            "lane": "right_wing",
+            "third": "attacking",
+            "count_for": 6,
+            "count_against": 1,
+            "space_control_pct": 74.4
+          }
+        }
+      ]
+    },
+    {
+      "episode_id": 4,
+      "team": "teamA",
+      "start_time_s": 5.7,
+      "end_time_s": 6.1,
+      "outcome": "Lost Possession",
+      "distance_advanced_m": 0.7,
+      "possession_chain": [],
+      "players": [],
+      "events": [
+        {
+          "event_type": "possession_change",
+          "team": "teamA",
+          "time_s": 5.7,
+          "data": {
+            "from": "teamB",
+            "to": "teamA"
+          }
+        },
+        {
+          "event_type": "possession_recovery",
+          "team": "teamA",
+          "time_s": 5.7,
+          "data": {
+            "seconds_ago": 1.5
+          }
+        }
+      ]
+    },
+    {
+      "episode_id": 5,
+      "team": "teamB",
+      "start_time_s": 6.1,
+      "end_time_s": 8.5,
+      "outcome": "Line Break",
+      "distance_advanced_m": -1.5,
+      "possession_chain": [],
+      "players": [],
+      "events": [
+        {
+          "event_type": "high_press",
+          "team": "teamB",
+          "time_s": 5.8,
+          "data": {
+            "intensity": 5
+          }
+        },
+        {
+          "event_type": "possession_change",
+          "team": "teamB",
+          "time_s": 6.1,
+          "data": {
+            "from": "teamA",
+            "to": "teamB"
+          }
+        },
+        {
+          "event_type": "possession_recovery",
+          "team": "teamB",
+          "time_s": 6.1,
+          "data": {
+            "seconds_ago": 0.4
+          }
+        },
+        {
+          "event_type": "compact_block",
+          "team": "teamB",
+          "time_s": 6.4,
+          "data": {
+            "width_m": 24.0,
+            "area_m2": 83.0
+          }
+        },
+        {
+          "event_type": "line_break",
+          "team": "teamB",
+          "time_s": 6.7,
+          "data": {
+            "def_team": "teamA",
+            "def_line_x": 12.4
+          }
+        },
+        {
+          "event_type": "line_break",
+          "team": "teamB",
+          "time_s": 7.0,
+          "data": {
+            "def_team": "teamA",
+            "def_line_x": 12.9
+          }
+        },
+        {
+          "event_type": "compact_block",
+          "team": "teamB",
+          "time_s": 7.0,
+          "data": {
+            "width_m": 11.7,
+            "area_m2": 87.0
+          }
+        },
+        {
+          "event_type": "overload",
+          "team": "teamB",
+          "time_s": 7.1,
+          "data": {
+            "lane": "right_wing",
+            "third": "attacking",
+            "count_for": 5,
+            "count_against": 2,
+            "space_control_pct": 85.8
+          }
+        }
+      ]
+    },
+    {
+      "episode_id": 6,
+      "team": "teamA",
+      "start_time_s": 8.5,
+      "end_time_s": 8.9,
+      "outcome": "Attacking Third Entry",
+      "distance_advanced_m": 1.0,
+      "possession_chain": [],
+      "players": [],
+      "events": [
+        {
+          "event_type": "possession_change",
+          "team": "teamA",
+          "time_s": 8.5,
+          "data": {
+            "from": "teamB",
+            "to": "teamA"
+          }
+        },
+        {
+          "event_type": "possession_recovery",
+          "team": "teamA",
+          "time_s": 8.5,
+          "data": {
+            "seconds_ago": 2.4
+          }
+        }
+      ]
+    }
+  ],
+  "match_report": {
+    "possession_pct": [
+      23.9,
+      76.1
+    ],
+    "space_control_pct": [
+      56.3,
+      43.7
+    ],
+    "total_passes": 1,
+    "progressive_passes": 0,
+    "line_breaks": 7,
+    "overloads": 4,
+    "dominance_periods": 0,
+    "top_episode_ids": [
+      5,
+      2,
+      3
+    ]
+  },
+  "pass_network_report": {
+    "most_frequent": {
+      "sender": "LCM",
+      "receiver": "LCB",
+      "count": 1
+    },
+    "progressive_leaders": [],
+    "hub_players": [
+      {
+        "label": "LCM",
+        "degree": 1,
+        "involvement": 1,
+        "centrality": 1.0
+      },
+      {
+        "label": "LCB",
+        "degree": 1,
+        "involvement": 1,
+        "centrality": 1.0
+      }
+    ],
+    "longest_buildup": [
+      "LCM",
+      "LCB"
+    ]
+  },
+  "possession": {
+    "teamA_pct": 23.9,
+    "teamB_pct": 76.1,
+    "frames": 46
+  },
+  "formation_a": "4-2-1",
+  "formation_b": "5-1-1"
+}
