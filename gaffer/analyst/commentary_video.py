@@ -64,8 +64,20 @@ def _tts(text: str, out_wav: Path) -> float:
 
 # ── Subtitle drawing ──────────────────────────────────────────────────────────
 
+# cv2.putText's Hershey fonts are ASCII-only -- qwen's output routinely
+# includes curly quotes/dashes, which render as "???" boxes. Map the common
+# ones to plain ASCII before drawing; nothing else (anything not listed
+# passes through, accepting the rare odd glyph rather than aggressively
+# stripping characters that might still render fine).
+_ASCII_FOLD = str.maketrans({
+    "‘": "'", "’": "'", "“": '"', "”": '"',
+    "–": "-", "—": "-", "…": "...",
+})
+
+
 def _draw_subtitle(frame: np.ndarray, text: str, *, scale: float = 0.7, thick: int = 2) -> None:
     """Burn word-wrapped commentary into a translucent band at the bottom."""
+    text = text.translate(_ASCII_FOLD)
     H, W = frame.shape[:2]
     max_w = int(W * 0.9)
     words, lines, cur = text.split(), [], ""
