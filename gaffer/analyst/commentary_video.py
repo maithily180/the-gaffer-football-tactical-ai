@@ -128,6 +128,22 @@ def _fit_assigner(detector: FootballDetector, loader: VideoLoader, start: int, c
     return assigner
 
 
+def _fit_assigner_near_calibration(detector: FootballDetector, loader: VideoLoader,
+                                   calib_frame: int, n_total: int) -> TeamAssigner:
+    """Fit team-color clustering on a window around the calibration frame, not
+    the whole clip -- same window render_minimap.py already uses (+-5s). A
+    highlight clip can cut to a celebration close-up or a replay with no clean
+    two-team structure; sampling evenly across the WHOLE clip duration (as a
+    long continuous match recording allows) pulls jersey-color features from
+    those cutaways too and corrupts the K-means fit for every frame. The
+    calibration frame is guaranteed to sit inside the real tactical shot, so a
+    window around it can't land in a cutaway."""
+    win = int(5 * loader.fps)
+    start = max(0, min(calib_frame - win, n_total - 1))
+    end = min(n_total, calib_frame + win)
+    return _fit_assigner(detector, loader, start, max(1, end - start))
+
+
 def build_commentary_video(clip_path, calib_path, *, use_llm: bool = True,
                            notable_only: bool = True, duration: float | None = None,
                            out_path: Path | None = None, log=print) -> Path:
@@ -161,8 +177,8 @@ def build_commentary_video(clip_path, calib_path, *, use_llm: bool = True,
     n_total = loader.total_frames if duration is None else min(int(duration * fps), loader.total_frames)
 
     detector = FootballDetector(verbose=False)
-    assigner = _fit_assigner(detector, loader, 0, n_total)
     mgr = HomographyManager.from_calibration(calib_path)
+    assigner = _fit_assigner_near_calibration(detector, loader, mgr.calibration_frame or 0, n_total)
     minimap = MinimapRenderer(mgr)
     propagator = HomographyPropagator(mgr)
 
