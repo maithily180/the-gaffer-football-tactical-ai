@@ -87,8 +87,10 @@ class MinimapRenderer:
         alpha: float = config.MINIMAP_ALPHA,
         margin: int = 12,
         label: str | None = None,
+        corner: str = "bottom_right",
     ) -> np.ndarray:
-        """Draw the minimap and overlay it onto `frame` (bottom-right)."""
+        """Draw the minimap and overlay it onto `frame` in `corner`
+        (bottom_right | top_right | bottom_left | top_left)."""
         mini = self.render(detections, label=label)
         h0, w0 = mini.shape[:2]
         height = int(width * h0 / w0)
@@ -96,8 +98,12 @@ class MinimapRenderer:
 
         out = frame.copy()
         H, W = out.shape[:2]
-        x2, y2 = W - margin, H - margin
-        x1, y1 = x2 - width, y2 - height
+        right = "right" in corner
+        top = "top" in corner
+        x2 = (W - margin) if right else (margin + width)
+        x1 = x2 - width
+        y1 = margin if top else (H - margin - height)
+        y2 = y1 + height
         if x1 < 0 or y1 < 0:
             return out
         roi = out[y1:y2, x1:x2]

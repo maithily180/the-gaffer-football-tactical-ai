@@ -170,13 +170,29 @@ def build_commentary_video(clip_path, calib_path, *, use_llm: bool = True,
     # 300px is a small inset on a 1280px clip but eats half a 640px one.
     mini_w = max(160, int(loader.width * 0.24))
 
+    # Anchor the homography at the calibration frame. Propagating naively from
+    # frame 0 anchors H to the wrong camera pose, and any early scene cut then
+    # corrupts it for the rest of the clip (exactly what broke the bird's-eye on
+    # the multi-shot ronaldo clip). Instead: hold the static calibrated H up to
+    # the calibration frame, then propagate FORWARD from that correct anchor.
+    calib_H = mgr.H.copy() if mgr.H is not None else None
+    calib_frame = mgr.calibration_frame or 0
+    seeded = False
+
     base = work / "base.mp4"
     log(f"Rendering {n_total} frames with minimap + subtitles...")
     with VideoWriter(base, fps=fps, width=loader.width, height=loader.height) as writer:
         for fidx, frame in loader.frames(start=0, count=n_total):
             dets = assigner.assign(frame, detector.detect(frame, fidx))
-            propagator.update(frame, exclude_dets=dets)
-            out = minimap.composite(frame, dets, width=mini_w)
+            if calib_H is not None and fidx < calib_frame:
+                mgr.H = calib_H.copy()                       # static, pre-calibration
+            elif calib_H is not None and not seeded:
+                mgr.H = calib_H.copy()                       # re-anchor exactly at calib frame
+                propagator.update(frame, exclude_dets=dets)  # seed flow here
+                seeded = True
+            else:
+                propagator.update(frame, exclude_dets=dets)  # propagate forward from anchor
+            out = minimap.composite(frame, dets, width=mini_w, corner="top_right")
             t = fidx / fps
             active = next((txt for (s, e, txt) in segments if s <= t < e), None)
             if active:
