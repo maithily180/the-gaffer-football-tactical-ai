@@ -97,6 +97,17 @@ class HomographyPropagator:
 
     # ── Public API ────────────────────────────────────────────────────────────
 
+    def reset(self) -> None:
+        """Forget tracked features so the next update() re-seeds from scratch
+        via the existing first-call path, instead of trying to chain optical
+        flow from a now-irrelevant previous frame. Call this whenever the
+        caller snaps self._mgr.H to a different anchor (a new shot, or a
+        scene cut with a closer anchor available) -- propagation should
+        measure distance from THAT anchor, not silently continue accumulating
+        from wherever it was."""
+        self._prev_gray = None
+        self._prev_pts = None
+
     def update(
         self,
         frame_bgr: np.ndarray,

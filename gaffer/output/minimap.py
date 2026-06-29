@@ -35,11 +35,12 @@ class MinimapRenderer:
 
     # ── Full-size pitch render ────────────────────────────────────────────────
 
-    def render(self, detections: List[Detection], label: str | None = None) -> np.ndarray:
+    def render(self, detections: List[Detection], label: str | None = None,
+              label_color: tuple[int, int, int] = (60, 220, 60)) -> np.ndarray:
         """Return a fresh pitch canvas with all projectable detections drawn."""
         img = self._base.copy()
         if not self.mgr.is_valid():
-            self._banner(img, "CALIBRATION LOST")
+            self._banner(img, "CALIBRATION LOST", (60, 60, 230))
             return img
 
         for det in detections:
@@ -54,7 +55,7 @@ class MinimapRenderer:
             self._draw_marker(img, det, cx, cy)
 
         if label:
-            self._banner(img, label)
+            self._banner(img, label, label_color)
         return img
 
     def _draw_marker(self, img: np.ndarray, det: Detection, cx: int, cy: int) -> None:
@@ -71,10 +72,10 @@ class MinimapRenderer:
         if det.class_name == "goalkeeper":             # ring to distinguish GK
             cv2.circle(img, (cx, cy), 11, (0, 255, 0), 2)
 
-    def _banner(self, img: np.ndarray, text: str) -> None:
+    def _banner(self, img: np.ndarray, text: str, color: tuple[int, int, int] = (60, 220, 60)) -> None:
         cv2.rectangle(img, (0, 0), (img.shape[1], 26), (0, 0, 0), -1)
         cv2.putText(img, text, (8, 19), cv2.FONT_HERSHEY_SIMPLEX, 0.6,
-                    (60, 220, 60), 2, cv2.LINE_AA)
+                    color, 2, cv2.LINE_AA)
 
     # ── Composite as a corner inset ───────────────────────────────────────────
 
@@ -87,11 +88,12 @@ class MinimapRenderer:
         alpha: float = config.MINIMAP_ALPHA,
         margin: int = 12,
         label: str | None = None,
+        label_color: tuple[int, int, int] = (60, 220, 60),
         corner: str = "bottom_right",
     ) -> np.ndarray:
         """Draw the minimap and overlay it onto `frame` in `corner`
         (bottom_right | top_right | bottom_left | top_left)."""
-        mini = self.render(detections, label=label)
+        mini = self.render(detections, label=label, label_color=label_color)
         h0, w0 = mini.shape[:2]
         height = int(width * h0 / w0)
         mini = cv2.resize(mini, (width, height), interpolation=cv2.INTER_AREA)

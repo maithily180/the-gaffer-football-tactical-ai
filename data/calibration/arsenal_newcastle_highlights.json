@@ -1,50 +1,191 @@
 {
   "clip": "arsenal_newcastle_highlights.mp4",
-  "frame_idx": 750,
   "fps": 25.0,
-  "image_points": {
-    "left_penalty_spot": [
-      30,
-      246
-    ],
-    "left_penalty_box_tr": [
-      460,
-      155
-    ],
-    "left_six_yard_tr": [
-      26,
-      185
-    ],
-    "left_arc_apex": [
-      321,
-      266
-    ],
-    "left_penalty_box_tl": [
-      57,
-      128
-    ],
-    "left_corner_top": [
-      232,
-      83
-    ]
-  },
-  "homography": [
-    [
-      0.0450927295806933,
-      0.17510428284413973,
-      -24.936773708213053
-    ],
-    [
-      -0.022780729902771708,
-      0.34243077324201465,
-      -23.190465208142225
-    ],
-    [
-      -0.00021106567956350584,
-      0.0031957328654942754,
-      1.0
-    ]
-  ],
-  "reprojection_mean_px": 2.1240272983256276,
-  "reprojection_max_px": 3.6933975481262484
+  "primary_frame_idx": 750,
+  "anchors": [
+    {
+      "frame_idx": 200,
+      "image_points": {
+        "right_penalty_spot": [
+          578,
+          246
+        ],
+        "right_penalty_box_tl": [
+          139,
+          165
+        ],
+        "right_penalty_box_tr": [
+          535,
+          128
+        ],
+        "right_penalty_box_bl": [
+          840,
+          418
+        ],
+        "right_six_yard_tl": [
+          574,
+          184
+        ],
+        "right_six_yard_tr": [
+          703,
+          168
+        ],
+        "right_six_yard_br": [
+          1055,
+          253
+        ],
+        "right_six_yard_bl": [
+          910,
+          275
+        ],
+        "right_arc_apex": [
+          302,
+          280
+        ],
+        "right_corner_top": [
+          371,
+          85
+        ],
+        "right_goal_center": [
+          854,
+          206
+        ]
+      },
+      "homography": [
+        [
+          0.03825400438606227,
+          0.1817956813337465,
+          103.64201105335852
+        ],
+        [
+          0.027846016085486234,
+          0.3508284606340497,
+          -40.263738733043816
+        ],
+        [
+          -7.597285548181498e-05,
+          0.0034965497595853714,
+          1.0
+        ]
+      ],
+      "reprojection_mean_px": 3.5965494674249836,
+      "reprojection_max_px": 6.976379977443908
+    },
+    {
+      "frame_idx": 750,
+      "image_points": {
+        "left_penalty_spot": [
+          30,
+          246
+        ],
+        "left_penalty_box_tr": [
+          460,
+          155
+        ],
+        "left_six_yard_tr": [
+          26,
+          185
+        ],
+        "left_arc_apex": [
+          321,
+          266
+        ],
+        "left_penalty_box_tl": [
+          57,
+          128
+        ],
+        "left_corner_top": [
+          232,
+          83
+        ]
+      },
+      "homography": [
+        [
+          0.0450927295806933,
+          0.17510428284413973,
+          -24.936773708213053
+        ],
+        [
+          -0.022780729902771708,
+          0.34243077324201465,
+          -23.190465208142225
+        ],
+        [
+          -0.00021106567956350584,
+          0.0031957328654942754,
+          1.0
+        ]
+      ],
+      "reprojection_mean_px": 2.1240272983256276,
+      "reprojection_max_px": 3.6933975481262484
+    },
+    {
+      "frame_idx": 2125,
+      "image_points": {
+        "right_penalty_spot": [
+          427,
+          328
+        ],
+        "right_penalty_box_tr": [
+          384,
+          200
+        ],
+        "right_penalty_box_br": [
+          1277,
+          411
+        ],
+        "right_penalty_box_bl": [
+          718,
+          517
+        ],
+        "right_six_yard_tl": [
+          423,
+          261
+        ],
+        "right_six_yard_tr": [
+          565,
+          242
+        ],
+        "right_six_yard_br": [
+          953,
+          334
+        ],
+        "right_six_yard_bl": [
+          799,
+          358
+        ],
+        "right_arc_apex": [
+          112,
+          370
+        ],
+        "right_corner_top": [
+          194,
+          153
+        ],
+        "right_goal_center": [
+          741,
+          282
+        ]
+      },
+      "homography": [
+        [
+          0.04896205758404253,
+          0.19603724403175776,
+          127.22435442633544
+        ],
+        [
+          0.03594563428898091,
+          0.3931144963901368,
+          -67.44250934692205
+        ],
+        [
+          -6.413468038764998e-07,
+          0.003836280180028042,
+          1.0
+        ]
+      ],
+      "reprojection_mean_px": 3.1786466448843345,
+      "reprojection_max_px": 5.984703977782858
+    }
+  ]
 }

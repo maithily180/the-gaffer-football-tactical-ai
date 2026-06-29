@@ -131,6 +131,53 @@ def _mux_audio(video_path: Path, audio_segs: list[tuple[Path, float]], out_path:
     return out_path
 
 
+# ── Calibration confidence ────────────────────────────────────────────────────
+#
+# The propagator's own update() already knows when tracking has degraded
+# (`held`) or a cut just happened (`scene_cut`) -- today's render loop just
+# silently keeps the old H either way and never tells anyone. A second,
+# independent signal catches what the propagator's internal flow-tracking
+# CAN'T see: slow drift that never trips a cut or a hold, only visible by
+# checking whether the resulting projection is even plausible (this is
+# exactly the diagnostic that caught the original arsenal 60s bug -- `held`
+# and `scene_cut` were both False there the whole time). Surfacing both as a
+# state, rather than rendering every frame with the same visual confidence,
+# is the fix: don't pretend to know the geometry when the evidence says
+# otherwise.
+
+_UNCERTAIN_RATIO = 0.65   # on-pitch fraction below this (with enough players to judge) -> at least uncertain
+_LOST_RATIO = 0.35        # below this -> lost
+_MIN_PLAYERS_TO_JUDGE = 4 # fewer detections than this and the ratio is too noisy to trust
+
+
+def _on_pitch_ratio(mgr: HomographyManager, dets) -> tuple[int, float] | None:
+    """(n_player_dets, on_pitch_fraction), or None if too few player-class
+    detections this frame to judge plausibility from the ratio alone."""
+    players = [d for d in dets if d.class_name != "ball"]
+    if len(players) < _MIN_PLAYERS_TO_JUDGE:
+        return None
+    n_on = sum(1 for d in players if (w := mgr.project(d.foot_point)) is not None and mgr.on_pitch(*w))
+    return len(players), n_on / len(players)
+
+
+def _confidence_state(just_anchored: bool, prop_result, mgr: HomographyManager, dets) -> str:
+    """CALIBRATED | PROPAGATING | UNCERTAIN | LOST for this frame."""
+    if just_anchored:
+        return "CALIBRATED"
+    if prop_result is not None and prop_result.scene_cut:
+        return "LOST"           # propagator itself just detected a camera cut
+    ratio_info = _on_pitch_ratio(mgr, dets)
+    if ratio_info is not None:
+        _, ratio = ratio_info
+        if ratio < _LOST_RATIO:
+            return "LOST"        # current H projects most players off-pitch -- implausible
+        if ratio < _UNCERTAIN_RATIO:
+            return "UNCERTAIN"
+    if prop_result is not None and prop_result.held:
+        return "UNCERTAIN"      # flow tracking degraded this frame (old H kept, not yet disproven)
+    return "PROPAGATING"
+
+
 # ── Orchestration ─────────────────────────────────────────────────────────────
 
 def _fit_assigner(detector: FootballDetector, loader: VideoLoader, start: int, count: int) -> TeamAssigner:
@@ -198,29 +245,52 @@ def build_commentary_video(clip_path, calib_path, *, use_llm: bool = True,
     # 300px is a small inset on a 1280px clip but eats half a 640px one.
     mini_w = max(160, int(loader.width * 0.24))
 
-    # Anchor the homography at the calibration frame. Propagating naively from
-    # frame 0 anchors H to the wrong camera pose, and any early scene cut then
-    # corrupts it for the rest of the clip (exactly what broke the bird's-eye on
-    # the multi-shot ronaldo clip). Instead: hold the static calibrated H up to
-    # the calibration frame, then propagate FORWARD from that correct anchor.
-    calib_H = mgr.H.copy() if mgr.H is not None else None
-    calib_frame = mgr.calibration_frame or 0
-    seeded = False
+    # Anchor the homography at the NEAREST calibrated frame, not just the
+    # first one. Propagating from a single anchor across a whole multi-shot
+    # clip accumulates drift with no way to correct itself (confirmed: correct
+    # near the anchor, visibly wrong tens of seconds away on cut footage) --
+    # the propagator's own docstring says as much ("good for ONE shot, no
+    # global re-anchoring"). With multiple anchors (one per distinct camera
+    # shot, see scripts/collect_calibration.py --append), propagation never
+    # has to travel farther than the gap between two anchors -- the same
+    # short-range regime already proven correct.
+    anchors = mgr.anchors
+    anchor_idx = 0   # index into anchors of the currently-active one
 
     base = work / "base.mp4"
-    log(f"Rendering {n_total} frames with minimap + subtitles...")
+    state_counts = {"CALIBRATED": 0, "PROPAGATING": 0, "UNCERTAIN": 0, "LOST": 0}
+    log(f"Rendering {n_total} frames with minimap + subtitles ({len(anchors)} anchor(s))...")
     with VideoWriter(base, fps=fps, width=loader.width, height=loader.height) as writer:
         for fidx, frame in loader.frames(start=0, count=n_total):
             dets = assigner.assign(frame, detector.detect(frame, fidx))
-            if calib_H is not None and fidx < calib_frame:
-                mgr.H = calib_H.copy()                       # static, pre-calibration
-            elif calib_H is not None and not seeded:
-                mgr.H = calib_H.copy()                       # re-anchor exactly at calib frame
-                propagator.update(frame, exclude_dets=dets)  # seed flow here
-                seeded = True
+
+            just_anchored = False
+            result = None
+            if fidx < anchors[0][0]:
+                mgr.H = anchors[0][1].copy()                 # before the first anchor: hold it
+                just_anchored = True
             else:
-                propagator.update(frame, exclude_dets=dets)  # propagate forward from anchor
-            out = minimap.composite(frame, dets, width=mini_w, corner="top_right")
+                while anchor_idx + 1 < len(anchors) and fidx >= anchors[anchor_idx + 1][0]:
+                    anchor_idx += 1
+                    mgr.H = anchors[anchor_idx][1].copy()     # advance to the next anchor
+                    propagator.reset()
+                    just_anchored = True
+                if fidx == anchors[anchor_idx][0]:
+                    mgr.H = anchors[anchor_idx][1].copy()     # land exactly on it -- re-anchor precisely
+                    propagator.reset()
+                    just_anchored = True
+                result = propagator.update(frame, exclude_dets=dets)   # seeds (just reset) or propagates forward
+
+            state = _confidence_state(just_anchored, result, mgr, dets)
+            state_counts[state] += 1
+
+            # LOST: don't draw player positions we have positive reason to
+            # distrust -- an empty pitch + banner is honest, wrong dots aren't.
+            minimap_dets = [] if state == "LOST" else dets
+            banner = {"UNCERTAIN": "TRACKING UNCERTAIN", "LOST": "TRACKING LOST"}.get(state)
+            banner_color = {"UNCERTAIN": (0, 210, 230), "LOST": (60, 60, 230)}.get(state, (60, 220, 60))
+            out = minimap.composite(frame, minimap_dets, width=mini_w, corner="top_right",
+                                    label=banner, label_color=banner_color)
             t = fidx / fps
             active = next((txt for (s, e, txt) in segments if s <= t < e), None)
             if active:
@@ -228,6 +298,7 @@ def build_commentary_video(clip_path, calib_path, *, use_llm: bool = True,
             writer.write(out)
             if fidx and fidx % 250 == 0:
                 log(f"  {fidx}/{n_total} frames")
+    log(f"  confidence: {state_counts}")
     loader.close()
 
     # 3. mux narration onto the video
