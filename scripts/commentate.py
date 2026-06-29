@@ -36,13 +36,21 @@ def main() -> None:
     ap.add_argument("--no-llm", action="store_true",
                      help="deterministic commentary only (no Ollama call)")
     ap.add_argument("--force", action="store_true", help="bypass the bundle cache, re-run detection")
+    ap.add_argument("--min-importance", type=float, default=0.0,
+                     help="skip episodes below this importance_score() (see commentary.py)")
+    ap.add_argument("--style", choices=["broadcast", "tactical", "casual"], default="broadcast",
+                     help="commentary register")
+    ap.add_argument("--no-memory", action="store_true",
+                     help="disable narrative-memory continuity context between episodes")
     args = ap.parse_args()
 
     clip_path = Path(args.clip)
     calib_path = Path(args.calib) if args.calib else config.DATA_DIR / "calibration" / f"{clip_path.stem}.json"
 
     bundle = build_bundle(clip_path, calib_path, force=args.force)
-    lines = commentate_match(bundle, use_llm=not args.no_llm, notable_only=args.notable_only)
+    lines = commentate_match(bundle, use_llm=not args.no_llm, notable_only=args.notable_only,
+                             min_importance=args.min_importance, style=args.style,
+                             use_narrative_memory=not args.no_memory)
     if not lines:
         print("No episodes to commentate.")
         return

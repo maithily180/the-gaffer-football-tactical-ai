@@ -32,6 +32,10 @@ def main() -> None:
     ap.add_argument("--duration", type=float, default=None, help="render only the first N seconds (for testing)")
     ap.add_argument("--no-llm", action="store_true", help="deterministic commentary only (no Ollama)")
     ap.add_argument("--all", action="store_true", help="narrate every possession, not just notable ones")
+    ap.add_argument("--min-importance", type=float, default=0.0,
+                     help="skip episodes below this importance_score() (see commentary.py)")
+    ap.add_argument("--style", choices=["broadcast", "tactical", "casual"], default="broadcast",
+                     help="commentary register")
     args = ap.parse_args()
 
     clip_path = Path(args.clip)
@@ -41,6 +45,8 @@ def main() -> None:
         clip_path, calib_path,
         use_llm=not args.no_llm,
         notable_only=not args.all,
+        min_importance=args.min_importance,
+        style=args.style,
         duration=args.duration,
     )
     print(f"Wrote: {out}")

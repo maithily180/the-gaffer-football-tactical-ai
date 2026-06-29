@@ -21,6 +21,7 @@ quick tests.
 
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 import wave
@@ -32,7 +33,7 @@ import numpy as np
 import pyttsx3
 
 from gaffer import config
-from gaffer.analyst.commentary import commentate_match
+from gaffer.analyst.commentary import commentate_match, importance_score
 from gaffer.analyst.match_bundle import build_bundle
 from gaffer.calibration.homography_manager import HomographyManager
 from gaffer.calibration.homography_propagator import HomographyPropagator
@@ -43,23 +44,71 @@ from gaffer.video.loader import VideoLoader
 from gaffer.video.writer import VideoWriter
 
 _TTS_RATE = 165          # words-per-minute; SAPI default ~200 is too fast for commentary
-_GAP_S = 0.3             # silence between back-to-back narrations
+_GAP_S = 0.3             # baseline silence between back-to-back narrations
 _FONT = cv2.FONT_HERSHEY_SIMPLEX
 
 
 # ── Text-to-speech ────────────────────────────────────────────────────────────
 
-def _tts(text: str, out_wav: Path) -> float:
+def _tts(text: str, out_wav: Path, rate: int = _TTS_RATE) -> float:
     """Render `text` to a wav with offline SAPI5 and return its duration.
     A fresh engine per call -- pyttsx3 reuse-across-runAndWait only reliably
     writes the first file on Windows."""
     eng = pyttsx3.init()
-    eng.setProperty("rate", _TTS_RATE)
+    eng.setProperty("rate", rate)
     eng.save_to_file(text, str(out_wav))
     eng.runAndWait()
     eng.stop()
     with wave.open(str(out_wav), "rb") as w:
         return w.getnframes() / float(w.getframerate())
+
+
+_PAUSE_S = 0.25  # real silence spliced between sentences -- see _tts_with_pauses
+
+
+def _rate_for_importance(importance: float) -> int:
+    """Faster, more energetic delivery for high-importance episodes, calmer
+    for routine ones -- pyttsx3/SAPI5 has no working pause/prosody markup
+    (verified directly: embedding a <silence msec="..."/>-style tag produces
+    ZERO actual silent gap in the output's energy envelope -- the engine
+    reads the tag's literal characters aloud instead of executing it), but
+    `rate` via setProperty is a real, already-working lever."""
+    return int(150 + min(importance, 8.0) * 7.5)  # ~154 (quiet) .. 210 (big moment)
+
+
+def _tts_with_pauses(text: str, out_wav: Path, rate: int) -> float:
+    """Same contract as _tts() but splices a real silence buffer between
+    sentences instead of relying on markup that doesn't work with this
+    engine (see _rate_for_importance) -- synthesizes each sentence
+    separately and concatenates the raw PCM with actual zero-amplitude
+    frames in between, so the pause is real audio, not a hopeful tag."""
+    sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s.strip()]
+    if len(sentences) <= 1:
+        return _tts(text, out_wav, rate)
+
+    frames_list: list[bytes] = []
+    params = None
+    for i, sent in enumerate(sentences):
+        part = out_wav.parent / f"{out_wav.stem}_part{i}.wav"
+        _tts(sent, part, rate)
+        with wave.open(str(part), "rb") as w:
+            params = params or w.getparams()
+            frames_list.append(w.readframes(w.getnframes()))
+        part.unlink()
+
+    # Byte count must be a whole multiple of the sample frame size (sampwidth
+    # * nchannels) or every sample after the splice point shifts by a byte --
+    # silent in isolation, but corrupts the PCM stream once ffmpeg muxes it
+    # (confirmed: this exact bug produced a real "Invalid PCM packet" decode
+    # warning the first time this ran for real). Round the FRAME count, not
+    # the byte count, then convert.
+    n_silence_frames = int(params.framerate * _PAUSE_S)
+    silence = b"\x00" * (n_silence_frames * params.sampwidth * params.nchannels)
+    combined = silence.join(frames_list)
+    with wave.open(str(out_wav), "wb") as out:
+        out.setparams(params)
+        out.writeframes(combined)
+    return len(combined) / (params.framerate * params.sampwidth * params.nchannels)
 
 
 # ── Subtitle drawing ──────────────────────────────────────────────────────────
@@ -178,6 +227,71 @@ def _confidence_state(just_anchored: bool, prop_result, mgr: HomographyManager, 
     return "PROPAGATING"
 
 
+def _scan_confidence_runs(clip_path: Path, calib_path: Path,
+                          duration: float | None = None) -> list[tuple[str, float, float]]:
+    """[(state, start_s, end_s), ...] for the whole clip, computed BEFORE
+    the real render loop so commentary generation (which has to happen
+    before that loop, to know narration timings for the subtitle burn-in)
+    can know which episodes overlap a LOST stretch. Deliberately cheap: no
+    object detection, no minimap, no video output -- just the propagator's
+    own scene_cut/held signals, which is why this can run as a quick extra
+    pass instead of doubling render time by running detection twice.
+
+    Honest tradeoff: without real detections this can't run the on-pitch-
+    ratio check the full render loop also does, so it won't catch slow
+    undetected drift (only cuts and flow-tracking failures) -- the visual
+    minimap banner in the main loop still catches that case fully. A
+    second full detection pass just to make the spoken caveat as sharp as
+    the visual one isn't worth doubling render time for."""
+    mgr = HomographyManager.from_calibration(calib_path)
+    loader = VideoLoader(str(clip_path))
+    fps = loader.fps
+    n_total = loader.total_frames if duration is None else min(int(duration * fps), loader.total_frames)
+    propagator = HomographyPropagator(mgr)
+    anchors = mgr.anchors
+    anchor_idx = 0
+
+    runs: list[tuple[str, float, float]] = []
+    cur_state, cur_start = None, 0.0
+    for fidx, frame in loader.frames(start=0, count=n_total):
+        just_anchored = False
+        result = None
+        if fidx < anchors[0][0]:
+            just_anchored = True
+        else:
+            while anchor_idx + 1 < len(anchors) and fidx >= anchors[anchor_idx + 1][0]:
+                anchor_idx += 1
+                propagator.reset()
+                just_anchored = True
+            if fidx == anchors[anchor_idx][0]:
+                propagator.reset()
+                just_anchored = True
+            result = propagator.update(frame, exclude_dets=None)
+
+        if just_anchored:
+            state = "CALIBRATED"
+        elif result is not None and result.scene_cut:
+            state = "LOST"
+        elif result is not None and result.held:
+            state = "UNCERTAIN"
+        else:
+            state = "PROPAGATING"
+
+        t = fidx / fps
+        if state != cur_state:
+            if cur_state is not None:
+                runs.append((cur_state, cur_start, t))
+            cur_state, cur_start = state, t
+    if cur_state is not None:
+        runs.append((cur_state, cur_start, n_total / fps))
+    loader.close()
+    return runs
+
+
+def _overlaps_lost(ep_start: float, ep_end: float, runs: list[tuple[str, float, float]]) -> bool:
+    return any(state == "LOST" and ep_start < end and ep_end > start for state, start, end in runs)
+
+
 # ── Orchestration ─────────────────────────────────────────────────────────────
 
 def _fit_assigner(detector: FootballDetector, loader: VideoLoader, start: int, count: int) -> TeamAssigner:
@@ -204,7 +318,8 @@ def _fit_assigner_near_calibration(detector: FootballDetector, loader: VideoLoad
 
 
 def build_commentary_video(clip_path, calib_path, *, use_llm: bool = True,
-                           notable_only: bool = True, duration: float | None = None,
+                           notable_only: bool = True, min_importance: float = 0.0,
+                           style: str = "broadcast", duration: float | None = None,
                            out_path: Path | None = None, log=print) -> Path:
     """Render <clip> as one mp4 with bird's-eye minimap, timed commentary
     subtitles, and a spoken narration track. Returns the output path."""
@@ -214,18 +329,30 @@ def build_commentary_video(clip_path, calib_path, *, use_llm: bool = True,
     work = config.OUTPUTS_DIR / "commentary_video" / clip_path.stem
     work.mkdir(parents=True, exist_ok=True)
 
-    # 1. commentary + TTS, scheduled so narrations never overlap
+    log("Scanning tracking confidence...")
+    confidence_runs = _scan_confidence_runs(clip_path, calib_path, duration=duration)
+
+    # 1. commentary + TTS, scheduled so narrations never overlap. Gap between
+    # back-to-back narrations grows with how much has already been said in
+    # the preceding window -- "let the match breathe" rather than a flat gap.
     log("Generating commentary + narration...")
     segments: list[tuple[float, float, str]] = []   # (audio_start, audio_end, text)
     audio_segs: list[tuple[Path, float]] = []
     cursor = 0.0
-    for ep, text in commentate_match(bundle, use_llm=use_llm, notable_only=notable_only):
+    for ep, text in commentate_match(bundle, use_llm=use_llm, notable_only=notable_only,
+                                     min_importance=min_importance, style=style):
         if duration is not None and ep.start_time_s >= duration:
             break
+        if _overlaps_lost(ep.start_time_s, ep.end_time_s, confidence_runs):
+            text = "Tracking was uncertain through this passage. " + text
         wav = work / f"seg_{ep.episode_id}.wav"
-        dur = _tts(text, wav)
+        rate = _rate_for_importance(importance_score(ep))
+        dur = _tts_with_pauses(text, wav, rate)
+        recent_talk = sum(min(e, cursor) - s for s, e, _ in segments
+                          if e > cursor - 20.0 and s < cursor)
+        gap = _GAP_S + min(recent_talk / 20.0, 1.0) * 1.5
         start = max(ep.start_time_s, cursor)
-        cursor = start + dur + _GAP_S
+        cursor = start + dur + gap
         segments.append((start, start + dur, text))
         audio_segs.append((wav, start))
     log(f"  {len(segments)} narrated episodes")

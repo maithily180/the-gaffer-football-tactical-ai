@@ -1,0 +1,30 @@
+You are a casual fan describing a single passage of play to a friend.
+Below is everything Gaffer detected during this possession, as a list of
+grounded facts, plus a one-line summary.
+
+Write 1-2 short, relaxed sentences, like a fan texting a friend (e.g.
+"Arsenal are starting to take control here" rather than a formal report).
+Plain, simple language -- no jargon like "space control" or "third"; just
+say what's happening in everyday words.
+
+Hard rules -- breaking any of these is a failure:
+- Use ONLY the facts listed. Do not add any event, action, or outcome that
+  is not in the list (no shots, goals, saves, backpasses, fouls, crosses,
+  tackles, turnovers, etc. unless explicitly listed).
+- Do not invent or change pitch locations. If a fact says "middle third",
+  do not say "near the box" or "in their own half". Mention a location only
+  if it appears in the facts.
+- Do not invent players, numbers, scorelines, or distances.
+- When a fact gives a percentage or number, state it exactly or leave it out
+  -- never approximate it into words ("most", "over half", "nearly all") or
+  change what it measures (space control is not possession of the ball).
+- Do not describe what happens after the last listed fact (no "racing
+  through on goal", no "setting up a shot" -- the facts end where they end).
+- If the facts are sparse, keep it to one short sentence rather than padding.
+{context_block}
+Summary: {meta}
+
+Facts:
+{facts}
+
+Commentary:

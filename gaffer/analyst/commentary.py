@@ -29,11 +29,20 @@ No new detection, analytics, or persisted state.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from gaffer.analyst import answer_generator
 from gaffer.analyst.match_bundle import MatchBundle
-from gaffer.analytics.episodes import Episode
+from gaffer.analytics.episodes import (
+    OUTCOME_ATTACKING_THIRD_ENTRY,
+    OUTCOME_COUNTER,
+    OUTCOME_LINE_BREAK,
+    OUTCOME_LOST_POSSESSION,
+    OUTCOME_PRESS_SUCCESS,
+    OUTCOME_SUSTAINED_POSSESSION,
+    Episode,
+)
 from gaffer.events.base import (
     COUNTER_ATTACK,
     DOMINANCE,
@@ -44,13 +53,46 @@ from gaffer.events.base import (
     PROGRESSIVE_PASS,
 )
 
-_PROMPT_PATH = Path(__file__).parent / "prompts" / "commentary.txt"
+_PROMPTS_DIR = Path(__file__).parent / "prompts"
+_STYLE_PROMPTS = {
+    "broadcast": _PROMPTS_DIR / "commentary_broadcast.txt",
+    "tactical": _PROMPTS_DIR / "commentary_tactical.txt",
+    "casual": _PROMPTS_DIR / "commentary_casual.txt",
+}
 
 # Below this many grounded facts there's no sequence worth an LLM connecting,
 # and a single clause ("win the ball back") gives a small model far too much
 # room to invent a cause or aftermath -- the deterministic line is both safer
 # and already complete, so the LLM only earns its keep at >= this many facts.
 _LLM_MIN_FACTS = 2
+
+# Mirrors episodes.py's own _classify() priority order (Counter > Line Break >
+# Attacking Third Entry > Press Success > Sustained Possession > Lost
+# Possession) -- the same ranking already used to pick an outcome is a
+# reasonable proxy for how much it's worth interrupting the match to narrate.
+_OUTCOME_BASE_SCORE = {
+    OUTCOME_COUNTER:               5.0,
+    OUTCOME_LINE_BREAK:            4.0,
+    OUTCOME_ATTACKING_THIRD_ENTRY: 3.0,
+    OUTCOME_PRESS_SUCCESS:         2.5,
+    OUTCOME_SUSTAINED_POSSESSION:  2.0,
+    OUTCOME_LOST_POSSESSION:       0.5,
+}
+
+
+def importance_score(ep: Episode) -> float:
+    """How much this episode is worth interrupting the match to narrate --
+    a derived value, not a persisted field, so it can change (e.g. retuned
+    weights) without touching match_bundle.py's cache schema or forcing a
+    pipeline rebuild on any clip. Built entirely from fields Episode already
+    carries: the outcome's existing priority rank, how many distinct
+    highlight beats happened (episode_facts(), already computed elsewhere),
+    and how far the ball actually moved."""
+    score = _OUTCOME_BASE_SCORE.get(ep.outcome, 1.0)
+    score += 0.5 * len(episode_facts(ep))
+    if ep.distance_advanced_m is not None and ep.distance_advanced_m > 0:
+        score += min(ep.distance_advanced_m, 50.0) / 10.0
+    return round(score, 2)
 
 
 def _team(t: str | None) -> str:
@@ -146,11 +188,45 @@ def _deterministic(ep: Episode, facts: list[str]) -> str:
     return body + tail
 
 
-def commentate_episode(ep: Episode, *, use_llm: bool = True) -> str:
+# Event types Gaffer has no detector for at all -- their presence in LLM
+# output is always fabrication, never a legitimate paraphrase of a real fact.
+# Deliberately excludes "goal"/"goals": the COUNTER_ATTACK clause itself says
+# "...toward goal" (a direction, not a scored goal), so banning it outright
+# rejected correct, already-grounded text -- confirmed by hand the first time
+# this check ran for real (the "tactical" style failed on a clean sentence
+# purely because it echoed "toward goal" from its own source fact).
+_BANNED_WORDS = re.compile(
+    r"\b(shot|shots|score|scores|scored|scoring|foul|fouls|tackle|tackles|"
+    r"save|saves|card|cards|penalty|penalties|offside|own half)\b",
+    re.IGNORECASE,
+)
+
+
+def _passes_fact_check(text: str, facts: list[str], ep: Episode) -> bool:
+    """Cheap, explicit guardrail on LLM output, run after generation --
+    same spirit as v2.1's UNSUPPORTED keyword checks, not a second LLM call.
+    Catches the two embellishment classes actually observed in v3.1/v3.2
+    (invented events, loosened/invented numbers); does NOT catch a wrong
+    number spelled out in words ("four" vs "5") -- a known gap in a
+    deliberately cheap check, not an exhaustive validator."""
+    if _BANNED_WORDS.search(text):
+        return False
+    allowed_numbers = set(re.findall(r"\d+", " ".join(facts)))
+    allowed_numbers.add(str(round(ep.duration_s)))
+    text_numbers = set(re.findall(r"\d+", text))
+    return text_numbers.issubset(allowed_numbers)
+
+
+def commentate_episode(ep: Episode, *, use_llm: bool = True, style: str = "broadcast",
+                       context_line: str | None = None) -> str:
     """Analyst commentary for one episode. With the LLM reachable it connects
-    the grounded clauses into natural prose; otherwise it returns the
+    the grounded clauses into natural prose in the requested register
+    ("broadcast" | "tactical" | "casual"); otherwise it returns the
     deterministic join. Either way the output is built only from
-    episode_facts(ep) -- the LLM never sees raw events or invents play."""
+    episode_facts(ep) -- the LLM never sees raw events or invents play.
+    context_line, if given (see narrative_memory.py), is continuity flavor
+    only -- a failed fact-check still falls back to the deterministic line,
+    so a bad inference there can taint phrasing but never a stated fact."""
     facts = episode_facts(ep)
     if not use_llm or len(facts) < _LLM_MIN_FACTS:
         return _deterministic(ep, facts)
@@ -162,10 +238,18 @@ def commentate_episode(ep: Episode, *, use_llm: bool = True) -> str:
     # events (counter, line break, ...) are already in the facts; the duration
     # is the only safe extra context.
     meta = f"Possession by {_team(ep.team)}, lasting {ep.duration_s:.0f}s"
-    prompt = _PROMPT_PATH.read_text(encoding="utf-8").format(meta=meta, facts=fact_block)
+    context_block = (
+        f"\nContext (continuity/flavor only -- do not add detail from this, "
+        f"state only what's in Facts): {context_line}\n" if context_line else "\n"
+    )
+    template_path = _STYLE_PROMPTS.get(style, _STYLE_PROMPTS["broadcast"])
+    prompt = template_path.read_text(encoding="utf-8").format(
+        meta=meta, facts=fact_block, context_block=context_block)
     try:
         text = answer_generator.chat(prompt)
-        return text or _deterministic(ep, facts)
+        if text and _passes_fact_check(text, facts, ep):
+            return text
+        return _deterministic(ep, facts)
     except Exception:
         # Ollama not running / unreachable -- grounded deterministic fallback,
         # never a hard failure or a hallucinated fill-in.
@@ -173,14 +257,29 @@ def commentate_episode(ep: Episode, *, use_llm: bool = True) -> str:
 
 
 def commentate_match(bundle: MatchBundle, *, use_llm: bool = True,
-                     notable_only: bool = False) -> list[tuple[Episode, str]]:
+                     notable_only: bool = False, min_importance: float = 0.0,
+                     style: str = "broadcast", use_narrative_memory: bool = True
+                     ) -> list[tuple[Episode, str]]:
     """Per-episode commentary across the whole match in chronological order.
-    notable_only drops quiet (no-highlight) possessions, for a tighter
-    highlight-style narration."""
+    notable_only drops quiet (no-highlight) possessions; min_importance is
+    the finer-grained version (see importance_score()) -- both apply if set.
+    use_narrative_memory threads continuity context (narrative_memory.py)
+    through episodes in order; only meaningful for a full chronological
+    pass, so it's a flag here rather than always-on."""
+    from gaffer.analyst.narrative_memory import NarrativeMemory  # local: avoid a module-level cycle
+
     episodes = sorted(bundle.run.episodes, key=lambda e: e.start_time_s)
+    memory = NarrativeMemory() if use_narrative_memory else None
     out: list[tuple[Episode, str]] = []
     for ep in episodes:
-        if notable_only and not episode_facts(ep):
+        facts = episode_facts(ep)
+        if notable_only and not facts:
             continue
-        out.append((ep, commentate_episode(ep, use_llm=use_llm)))
+        if importance_score(ep) < min_importance:
+            continue
+        context_line = memory.context_line() if memory else None
+        text = commentate_episode(ep, use_llm=use_llm, style=style, context_line=context_line)
+        if memory:
+            memory.update(ep, facts)
+        out.append((ep, text))
     return out
